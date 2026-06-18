@@ -1,7 +1,7 @@
+export const runtime = "edge";
+
 const CHANNEL_ID = "UCid-t3mDuI574dotclfPQSA";
 const RSS_URL = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
-
-export const revalidate = 3600;
 
 export async function GET() {
   try {
@@ -12,7 +12,6 @@ export async function GET() {
         Accept:
           "application/atom+xml,application/xml,text/xml,application/rss+xml",
       },
-      next: { revalidate: 3600 },
     });
 
     const text = await res.text();
