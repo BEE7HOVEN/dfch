@@ -13,30 +13,45 @@ interface VideoEntry {
 }
 
 async function getVideos(): Promise<VideoEntry[]> {
-  const res = await fetch(
-    `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`,
-    { next: { revalidate: 3600 } }
-  );
-  const text = await res.text();
+  try {
+    const res = await fetch(
+      `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`,
+      {
+        next: { revalidate: 3600 },
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; dfch.kr/1.0)",
+        },
+      }
+    );
 
-  const videos: VideoEntry[] = [];
-  const entries = text.split("<entry>");
-  for (let i = 1; i < entries.length && i <= 12; i++) {
-    const entry = entries[i];
-    const idMatch = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/);
-    const titleMatch = entry.match(/<media:title>([^<]+)<\/media:title>/);
-    const pubMatch = entry.match(/<published>([^<]+)<\/published>/);
-
-    if (idMatch) {
-      videos.push({
-        id: idMatch[1],
-        title: titleMatch?.[1] || "",
-        published: pubMatch?.[1] || "",
-        thumbnail: `https://i.ytimg.com/vi/${idMatch[1]}/hqdefault.jpg`,
-      });
+    if (!res.ok) {
+      console.error("YouTube RSS fetch failed:", res.status);
+      return [];
     }
+
+    const text = await res.text();
+    const videos: VideoEntry[] = [];
+    const entries = text.split("<entry>");
+    for (let i = 1; i < entries.length && i <= 12; i++) {
+      const entry = entries[i];
+      const idMatch = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/);
+      const titleMatch = entry.match(/<media:title>([^<]+)<\/media:title>/);
+      const pubMatch = entry.match(/<published>([^<]+)<\/published>/);
+
+      if (idMatch) {
+        videos.push({
+          id: idMatch[1],
+          title: titleMatch?.[1] || "",
+          published: pubMatch?.[1] || "",
+          thumbnail: `https://i.ytimg.com/vi/${idMatch[1]}/hqdefault.jpg`,
+        });
+      }
+    }
+    return videos;
+  } catch (e) {
+    console.error("YouTube RSS error:", e);
+    return [];
   }
-  return videos;
 }
 
 export default async function MediaPage() {
