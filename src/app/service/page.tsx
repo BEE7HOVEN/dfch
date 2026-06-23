@@ -1,24 +1,14 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Hero from "@/components/Hero";
 import Image from "next/image";
 
 export default function ServicePage() {
   return (
     <>
       <Header />
-      <main>
-        <section className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: "url(/images/service-hero.jpg)" }}
-          />
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="relative z-10 flex items-center justify-center h-full">
-            <h1 className="text-3xl md:text-4xl text-white font-light tracking-wider">
-              예배안내
-            </h1>
-          </div>
-        </section>
+      <main className="pt-16">
+        <Hero image="/images/service-hero.jpg" title="예배안내" />
 
         <section className="py-20 md:py-32 px-4">
           <div className="max-w-3xl mx-auto">

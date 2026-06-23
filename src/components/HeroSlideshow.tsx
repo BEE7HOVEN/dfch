@@ -32,24 +32,19 @@ export default function HeroSlideshow() {
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      <div
-        className="flex h-full transition-transform duration-[1200ms] ease-in-out"
-        style={{ transform: `translateX(-${current * 100}%)` }}
-      >
-        {slides.map((src) => (
-          <div
-            key={src}
-            className="min-w-full h-full bg-cover bg-center flex-shrink-0"
-            style={{ backgroundImage: `url(${src})` }}
-          />
-        ))}
-      </div>
+      {slides.map((src, i) => (
+        <div
+          key={src}
+          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-[1200ms] ease-in-out ${
+            i === current ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ backgroundImage: `url(${src})` }}
+        />
+      ))}
 
       <div className="absolute inset-0 bg-black/30" />
 
-      <div className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-4"
-        style={{ marginTop: "-100vh" }}
-      >
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-white text-center px-4">
         <h1 className="text-3xl md:text-5xl font-light leading-relaxed tracking-wider">
           말씀이 삶이 되고
         </h1>

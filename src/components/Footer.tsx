@@ -4,7 +4,8 @@ import Image from "next/image";
 const navItems = [
   { label: "드림숲교회", href: "/" },
   { label: "섬기는 분들", href: "/pastor" },
-  { label: "미디어", href: "/media" },
+  { label: "설교말씀", href: "/media" },
+  { label: "목회편지", href: "/letters" },
   { label: "예배안내", href: "/service" },
 ];
 
