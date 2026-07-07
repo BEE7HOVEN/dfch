@@ -1,4 +1,4 @@
-import { getSupabase } from "@/lib/supabase";
+import { getSql } from "@/lib/db";
 
 export type PostCategory = "letter" | "news";
 
@@ -12,41 +12,46 @@ export interface Post {
   updated_at: string;
 }
 
-export async function getLetters(): Promise<Post[]> {
-  const supabase = getSupabase();
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*")
-    .eq("category", "letter")
-    .order("post_date", { ascending: false })
-    .order("created_at", { ascending: false });
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-  if (error) throw new Error(error.message);
-  return (data ?? []) as Post[];
+// 날짜/타임스탬프는 ::text로 캐스팅해 "YYYY-MM-DD" 문자열로 받는다(타임존 오류 방지).
+export async function getLetters(): Promise<Post[]> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, category, title, content,
+           post_date::text AS post_date,
+           created_at::text AS created_at,
+           updated_at::text AS updated_at
+    FROM posts
+    WHERE category = 'letter'
+    ORDER BY post_date DESC, created_at DESC`;
+  return rows as Post[];
 }
 
 export async function getAllPosts(): Promise<Post[]> {
-  const supabase = getSupabase();
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*")
-    .order("post_date", { ascending: false })
-    .order("created_at", { ascending: false });
-
-  if (error) throw new Error(error.message);
-  return (data ?? []) as Post[];
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, category, title, content,
+           post_date::text AS post_date,
+           created_at::text AS created_at,
+           updated_at::text AS updated_at
+    FROM posts
+    ORDER BY post_date DESC, created_at DESC`;
+  return rows as Post[];
 }
 
 export async function getPost(id: string): Promise<Post | null> {
-  const supabase = getSupabase();
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-
-  if (error) throw new Error(error.message);
-  return (data as Post) ?? null;
+  if (!UUID_RE.test(id)) return null;
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, category, title, content,
+           post_date::text AS post_date,
+           created_at::text AS created_at,
+           updated_at::text AS updated_at
+    FROM posts
+    WHERE id = ${id}`;
+  return (rows[0] as Post) ?? null;
 }
 
 export async function createPost(input: {
@@ -55,35 +60,27 @@ export async function createPost(input: {
   content: string;
   post_date: string;
 }): Promise<void> {
-  const supabase = getSupabase();
-  const { error } = await supabase.from("posts").insert({
-    category: input.category,
-    title: input.title,
-    content: input.content,
-    post_date: input.post_date,
-  });
-  if (error) throw new Error(error.message);
+  const sql = getSql();
+  await sql`
+    INSERT INTO posts (category, title, content, post_date)
+    VALUES (${input.category}, ${input.title}, ${input.content}, ${input.post_date})`;
 }
 
 export async function updatePost(
   id: string,
   input: { title: string; content: string; post_date: string },
 ): Promise<void> {
-  const supabase = getSupabase();
-  const { error } = await supabase
-    .from("posts")
-    .update({
-      title: input.title,
-      content: input.content,
-      post_date: input.post_date,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", id);
-  if (error) throw new Error(error.message);
+  const sql = getSql();
+  await sql`
+    UPDATE posts
+    SET title = ${input.title},
+        content = ${input.content},
+        post_date = ${input.post_date},
+        updated_at = now()
+    WHERE id = ${id}`;
 }
 
 export async function deletePost(id: string): Promise<void> {
-  const supabase = getSupabase();
-  const { error } = await supabase.from("posts").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  const sql = getSql();
+  await sql`DELETE FROM posts WHERE id = ${id}`;
 }
