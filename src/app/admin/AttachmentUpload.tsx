@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { createAttachmentUploadAction } from "@/app/admin/actions";
 import { resizeForUpload } from "./imageResize";
 import { putWithProgress } from "./upload";
+import { pdfToPageImages } from "./pdfPages";
 
 export interface ExistingAttachment {
   id: string;
@@ -45,9 +46,10 @@ export default function AttachmentUpload({
   const [items, setItems] = useState<NewItem[]>([]);
   const [removed, setRemoved] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [splitting, setSplitting] = useState(false); // PDF 쪽을 사진으로 바꾸는 중
   const previews = useRef<string[]>([]);
 
-  const busy = items.some((i) => ["waiting", "converting", "uploading"].includes(i.status));
+  const busy = splitting || items.some((i) => ["waiting", "converting", "uploading"].includes(i.status));
   useEffect(() => onBusyChange(busy), [busy, onBusyChange]);
   useEffect(() => () => previews.current.forEach((u) => URL.revokeObjectURL(u)), []);
 
@@ -119,8 +121,24 @@ export default function AttachmentUpload({
     if (files.length === 0) return;
     setError(null);
 
-    const accepted = files.filter((f) => mode === "images+pdf" || !isPdf(f));
-    if (accepted.length < files.length) setError("PDF는 올릴 수 없습니다. 사진만 골라주세요.");
+    const picked = files.filter((f) => mode === "images+pdf" || !isPdf(f));
+    if (picked.length < files.length) setError("PDF는 올릴 수 없습니다. 사진만 골라주세요.");
+
+    // 주보 PDF는 저장용으로 그대로 올리고, 쪽마다 사진으로도 바꿔 올려 넘겨 보기에 쓴다.
+    const accepted: File[] = [];
+    for (const file of picked) {
+      accepted.push(file);
+      if (!isPdf(file)) continue;
+      setSplitting(true);
+      try {
+        accepted.push(...(await pdfToPageImages(file)));
+      } catch (err) {
+        console.error(err);
+        setError("PDF 쪽을 사진으로 바꾸지 못해 PDF만 올립니다. 넘겨 보기를 쓰려면 주보 사진을 따로 올려 주세요.");
+      } finally {
+        setSplitting(false);
+      }
+    }
 
     const queued = accepted.map((file) => ({
       file,
@@ -153,7 +171,7 @@ export default function AttachmentUpload({
 
   return (
     <div>
-      <label htmlFor="attachments-input" className="block text-sm text-[#404040] mb-2">
+      <label htmlFor="attachments-input" className="block text-sm text-sub mb-2">
         {label}
       </label>
       <input
@@ -162,7 +180,7 @@ export default function AttachmentUpload({
         multiple
         accept={mode === "images" ? "image/*" : "image/*,application/pdf,.pdf"}
         onChange={handleChange}
-        className="block w-full text-sm text-[#404040] file:mr-4 file:px-4 file:py-2.5 file:rounded-lg file:border-0 file:bg-gray-100 file:text-[#404040] hover:file:bg-gray-200"
+        className="block w-full text-sm text-sub file:mr-4 file:px-4 file:py-2.5 file:rounded-lg file:border-0 file:bg-mist file:text-forest hover:file:bg-line"
       />
       <input
         type="hidden"
@@ -171,10 +189,11 @@ export default function AttachmentUpload({
       />
       <input type="hidden" name="remove_attachments" value={JSON.stringify(removed)} />
 
-      <p className="mt-2 text-xs text-[#999]">
+      <p className="mt-2 text-xs text-mute">
         {mode === "images"
           ? "여러 장을 한 번에 고를 수 있습니다. 사진은 올리기 전에 알맞은 크기로 줄여집니다."
-          : "주보 사진 여러 장이나 PDF를 고르세요. 사진은 올리기 전에 알맞은 크기로 줄여집니다."}
+          : "주보 사진 여러 장이나 PDF를 고르세요. PDF는 쪽마다 사진으로도 바꿔 올려 넘겨 보기가 됩니다."}
+        {splitting && " PDF 쪽을 사진으로 바꾸는 중..."}
         {(visibleExisting.length > 0 || items.length > 0) &&
           ` 지금 ${visibleExisting.length + done.length}개${busy ? ", 올리는 중" : ""}${failed ? `, 실패 ${failed}개` : ""}.`}
       </p>
@@ -182,7 +201,7 @@ export default function AttachmentUpload({
       {(visibleExisting.length > 0 || items.length > 0) && (
         <ul className="mt-3 grid grid-cols-3 sm:grid-cols-4 gap-2">
           {visibleExisting.map((a) => (
-            <li key={a.id} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+            <li key={a.id} className="relative aspect-square rounded-lg overflow-hidden bg-paper">
               {a.kind === "image" && a.thumbUrl ? (
                 // R2 서명 주소라 next/image 최적화 대상이 아니다.
                 // eslint-disable-next-line @next/next/no-img-element
@@ -201,7 +220,7 @@ export default function AttachmentUpload({
             </li>
           ))}
           {items.map((i) => (
-            <li key={i.tempId} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+            <li key={i.tempId} className="relative aspect-square rounded-lg overflow-hidden bg-paper">
               {i.kind === "image" && i.preview ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={i.preview} alt="" className="w-full h-full object-cover" />
@@ -209,7 +228,7 @@ export default function AttachmentUpload({
                 <PdfTile name={i.name} />
               ) : null}
               {i.status !== "done" && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/70 text-xs text-[#404040] text-center px-1">
+                <div className="absolute inset-0 flex items-center justify-center bg-white/70 text-xs text-sub text-center px-1">
                   {i.status === "error"
                     ? i.error
                     : i.status === "uploading"
@@ -243,7 +262,7 @@ function PdfTile({ name }: { name: string | null }) {
   return (
     <div className="w-full h-full flex flex-col items-center justify-center gap-1 p-2 text-center">
       <span className="text-xs font-medium text-red-600">PDF</span>
-      <span className="text-[11px] text-[#666] break-all line-clamp-3">{name}</span>
+      <span className="text-[11px] text-sub break-all line-clamp-3">{name}</span>
     </div>
   );
 }
