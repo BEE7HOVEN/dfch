@@ -1,13 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-
-const navItems = [
-  { label: "드림숲교회", href: "/" },
-  { label: "섬기는 분들", href: "/pastor" },
-  { label: "설교말씀", href: "/media" },
-  { label: "목회편지", href: "/letters" },
-  { label: "예배안내", href: "/service" },
-];
+import { navGroups } from "@/lib/nav";
 
 export default function Footer() {
   return (
@@ -28,15 +21,20 @@ export default function Footer() {
             </div>
           </div>
 
-          <nav className="flex flex-col gap-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-sm text-white/60 hover:text-white transition-colors"
-              >
-                {item.label}
-              </Link>
+          <nav className="grid grid-cols-3 gap-6 md:gap-12">
+            {navGroups.map((group) => (
+              <div key={group.label} className="flex flex-col gap-2">
+                <p className="text-sm text-white mb-1">{group.label}</p>
+                {group.children.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="text-sm text-white/60 hover:text-white transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
             ))}
           </nav>
         </div>
