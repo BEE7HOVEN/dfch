@@ -283,6 +283,7 @@ export async function createPostAction(
   const id = await createPost({ category, title, content, post_date, audio_key });
   await addAttachments(id, attachments);
   revalidatePath(board.path);
+  revalidatePath("/"); // 메인의 최근 공지·묵상
   revalidatePath("/admin");
   redirect("/admin");
 }
@@ -328,6 +329,7 @@ export async function updatePostAction(
   }
   revalidatePath(board.path);
   revalidatePath(`${board.path}/${id}`);
+  revalidatePath("/"); // 메인의 최근 공지·묵상
   revalidatePath("/admin");
   redirect("/admin");
 }
@@ -345,6 +347,7 @@ export async function deletePostAction(formData: FormData): Promise<void> {
       files.flatMap((f) => [f.file_key, f.thumb_key].filter((k): k is string => !!k)),
     );
     for (const board of Object.values(boards)) revalidatePath(board.path);
+    revalidatePath("/"); // 메인의 최근 공지·묵상
     revalidatePath("/admin");
   }
   redirect("/admin");

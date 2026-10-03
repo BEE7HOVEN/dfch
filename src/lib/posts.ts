@@ -34,6 +34,24 @@ export async function getPostsByCategory(
   return rows as Post[];
 }
 
+// 메인 화면용: 분류별 최근 글 몇 개.
+export async function getRecentPosts(
+  category: PostCategory,
+  limit: number,
+): Promise<Post[]> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, category, title, content, audio_key,
+           post_date::text AS post_date,
+           created_at::text AS created_at,
+           updated_at::text AS updated_at
+    FROM posts
+    WHERE category = ${category}
+    ORDER BY post_date DESC, created_at DESC
+    LIMIT ${limit}`;
+  return rows as Post[];
+}
+
 export async function getAllPosts(): Promise<Post[]> {
   const sql = getSql();
   const rows = await sql`
