@@ -5,10 +5,10 @@
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
     "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 
-  --color-forest: #24402f; /* 포인트 색 (깊은 숲 초록) */
-  --color-forest-deep: #1a3023;
-  --color-forest-soft: #3d5e4a;
-  --color-mist: #eef3ef; /* 옅은 초록 바탕 */
+  --color-forest: #355a44; /* 포인트 색 (숲 초록, 2026-10-04 조금 흐리게) */
+  --color-forest-deep: #2a4636;
+  --color-forest-soft: #4f7560;
+  --color-mist: #eff5f1; /* 옅은 초록 바탕 */
   --color-paper: #f6f7f6; /* 칸 구분용 옅은 회색 바탕 */
   --color-ink: #1f2421; /* 진한 글 */
   --color-sub: #5b625d; /* 보조 글 */
