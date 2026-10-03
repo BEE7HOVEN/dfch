@@ -47,7 +47,7 @@ async function presign(
 const VIEW_WINDOW_MS = 3 * 60 * 60 * 1000;
 export function createViewUrl(
   key: string,
-  options: { downloadName?: string } = {},
+  options: { downloadName?: string; attachment?: boolean } = {},
 ): Promise<string> {
   const windowStart = new Date(
     Math.floor(Date.now() / VIEW_WINDOW_MS) * VIEW_WINDOW_MS,
@@ -56,7 +56,7 @@ export function createViewUrl(
   const params: Record<string, string> = {};
   if (options.downloadName) {
     params["response-content-disposition"] =
-      `inline; filename*=UTF-8''${encodeURIComponent(options.downloadName)}`;
+      `${options.attachment ? "attachment" : "inline"}; filename*=UTF-8''${encodeURIComponent(options.downloadName)}`;
   }
   return presign("GET", key, 60 * 60 * 6, { datetime, params });
 }

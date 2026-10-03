@@ -100,6 +100,33 @@ export async function getPost(id: string): Promise<Post | null> {
   return (rows[0] as Post) ?? null;
 }
 
+// 주보 본문 아래 이전·다음 글: 같은 분류에서 날짜(같으면 작성 시각) 기준 바로 앞(older)·뒤(newer) 글.
+export async function getAdjacentPosts(
+  post: Post,
+): Promise<{ older: Post | null; newer: Post | null }> {
+  const sql = getSql();
+  const [olderRows, newerRows] = await Promise.all([
+    sql`
+      SELECT id, title, post_date::text AS post_date
+      FROM posts
+      WHERE category = ${post.category}
+        AND (post_date, created_at) < (${post.post_date}::date, ${post.created_at}::timestamptz)
+      ORDER BY post_date DESC, created_at DESC
+      LIMIT 1`,
+    sql`
+      SELECT id, title, post_date::text AS post_date
+      FROM posts
+      WHERE category = ${post.category}
+        AND (post_date, created_at) > (${post.post_date}::date, ${post.created_at}::timestamptz)
+      ORDER BY post_date ASC, created_at ASC
+      LIMIT 1`,
+  ]);
+  return {
+    older: (olderRows[0] as Post) ?? null,
+    newer: (newerRows[0] as Post) ?? null,
+  };
+}
+
 export async function createPost(input: {
   category: PostCategory;
   title: string;
