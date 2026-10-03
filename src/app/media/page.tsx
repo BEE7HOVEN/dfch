@@ -1,16 +1,25 @@
+// 생명의 말씀 > 설교말씀: 예배실황·주일설교·수요설교 탭과 쪽 번호 (탭·쪽은 주소 ?tab=&page= 로 남긴다)
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import Hero from "@/components/Hero";
+import PageHeader from "@/components/PageHeader";
 import YouTubeMedia from "@/components/YouTubeMedia";
+import { TABS } from "@/lib/sermonTabs";
 
-export default function MediaPage() {
+export default async function MediaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const sp = await searchParams;
+  const tab = TABS.find((t) => t.key === sp.tab)?.key ?? TABS[0].key;
+  const page = Math.max(1, Number.parseInt(String(sp.page ?? "1"), 10) || 1);
+
   return (
     <>
       <Header />
-      <main className="pt-16">
-        <Hero image="/images/hero-7.jpg" title="설교말씀" />
-
-        <YouTubeMedia />
+      <main>
+        <PageHeader path="/media" />
+        <YouTubeMedia tab={tab} page={page} />
       </main>
       <Footer />
     </>
