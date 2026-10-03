@@ -3,9 +3,10 @@ import Footer from "@/components/Footer";
 import HeroSlideshow from "@/components/HeroSlideshow";
 import ChurchIntro from "@/components/ChurchIntro";
 import HomeRecentPosts from "@/components/HomeRecentPosts";
+import HomeRecentAlbums from "@/components/HomeRecentAlbums";
 import Image from "next/image";
 
-// 최근 공지·묵상을 보여 주므로 5분마다 새로 만든다. 관리자가 글을 바꾸면 그 즉시 갱신된다(actions.ts).
+// 최근 공지·묵상·앨범을 보여 주므로 5분마다 새로 만든다. 관리자가 글을 바꾸면 그 즉시 갱신된다(actions.ts).
 export const revalidate = 300;
 
 export default function Home() {
@@ -16,6 +17,8 @@ export default function Home() {
         <HeroSlideshow />
 
         <HomeRecentPosts />
+
+        <HomeRecentAlbums />
 
         <ChurchIntro />
 
