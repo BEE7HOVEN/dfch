@@ -58,11 +58,13 @@ export default function QuickAccess() {
             </ul>
           </div>
 
-          <div className="rounded-[24px] border border-line p-2.5">
-            <ul className="grid grid-cols-2 md:grid-cols-3 h-full">
+          {/* 6개를 모두 같은 크기의 카드로 놓아 바둑판이 반듯하게 (중요한 2개만 초록) */}
+          <ul className="grid grid-cols-2 md:grid-cols-3 auto-rows-fr gap-3 md:gap-4">
               {MENUS.map((m) => {
-                const className = `group h-full flex flex-col justify-between gap-6 rounded-2xl p-5 md:p-6 transition-colors ${
-                  m.strong ? "bg-forest text-white hover:bg-forest-soft" : "text-ink hover:bg-mist"
+                const className = `group h-full flex flex-col justify-between gap-6 rounded-[20px] border p-5 md:p-6 transition-colors ${
+                  m.strong
+                    ? "bg-forest border-forest text-white hover:bg-forest-soft hover:border-forest-soft"
+                    : "bg-white border-line text-ink hover:bg-mist hover:border-forest/30"
                 }`;
                 const body = (
                   <>
@@ -76,7 +78,7 @@ export default function QuickAccess() {
                   </>
                 );
                 return (
-                  <li key={m.title} className="p-1">
+                  <li key={m.title}>
                     {m.external ? (
                       <a href={m.href} target="_blank" rel="noopener noreferrer" className={className}>
                         {body}
@@ -89,8 +91,7 @@ export default function QuickAccess() {
                   </li>
                 );
               })}
-            </ul>
-          </div>
+          </ul>
         </div>
       </div>
     </section>
