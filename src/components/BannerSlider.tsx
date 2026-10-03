@@ -52,7 +52,7 @@ export default function BannerSlider({ items }: { items: BannerItem[] }) {
   }, [paused, count, move, current]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-2xl bg-[#2c2c2c]">
+    <div className="relative h-full w-full overflow-hidden rounded-[24px] bg-forest-deep">
       {usingFallback
         ? FALLBACK_PHOTOS.map((src, i) => (
             <div

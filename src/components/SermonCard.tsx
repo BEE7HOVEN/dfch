@@ -34,12 +34,9 @@ export default function SermonCard() {
   const info = video ? parseSermonTitle(video.title) : null;
 
   return (
-    <div className="h-full rounded-2xl bg-[#2c2c2c] text-white p-5 md:p-6 flex flex-col">
+    <div className="h-full rounded-[24px] bg-forest text-white p-6 md:p-7 flex flex-col">
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-[11px] tracking-[0.2em] text-white/50">SUNDAY MESSAGE</p>
-          <h2 className="mt-1 text-xl font-light">주일설교</h2>
-        </div>
+        <h2 className="text-xl font-bold">주일설교</h2>
         <Link
           href="/media"
           aria-label="설교말씀 더 보기"
@@ -72,7 +69,7 @@ export default function SermonCard() {
             <img src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`} alt="" className="w-full h-full object-cover" />
             <span className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/25 transition-colors">
               <span className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-                <svg className="w-5 h-5 text-[#2c2c2c] ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-forest ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </span>
@@ -88,7 +85,7 @@ export default function SermonCard() {
       <div className="mt-4 min-h-[4.5rem]">
         {info && (
           <>
-            <h3 className="text-lg md:text-xl leading-snug line-clamp-2">{info.title}</h3>
+            <h3 className="text-lg md:text-xl font-semibold leading-snug line-clamp-2">{info.title}</h3>
             <p className="mt-1.5 text-sm text-white/60">
               {[info.preacher, info.date].filter(Boolean).join(" · ")}
             </p>

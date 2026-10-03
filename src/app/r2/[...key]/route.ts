@@ -1,10 +1,10 @@
 // 메인처럼 오래 캐시되는 화면에서 쓰는 R2 사진 고정 주소. 요청 때마다 새 서명 주소로 넘겨준다.
 // 서명 주소를 HTML에 직접 넣으면 캐시된 화면이 6시간 넘게 쓰일 때 사진이 깨지기 때문이다.
-// 갤러리 미리보기와 메인 배너 사진만 허용해 다른 파일을 이 주소로 꺼낼 수 없게 한다.
+// 갤러리·주보 미리보기와 메인 배너 사진만 허용해 다른 파일을 이 주소로 꺼낼 수 없게 한다.
 import { createViewUrl } from "@/lib/r2";
 
 const ALLOWED_KEY_RE =
-  /^(gallery\/\d{4}-\d{2}-\d{2}-[0-9a-f-]{36}_t|banner\/\d{4}-\d{2}-\d{2}-[0-9a-f-]{36}(_t)?)\.jpg$/;
+  /^((gallery|bulletin)\/\d{4}-\d{2}-\d{2}-[0-9a-f-]{36}_t|banner\/\d{4}-\d{2}-\d{2}-[0-9a-f-]{36}(_t)?)\.jpg$/;
 
 export async function GET(
   _request: Request,
