@@ -13,6 +13,7 @@ import { createViewUrl } from "@/lib/r2";
 import { formatPostDate } from "@/lib/format";
 import { isAuthenticated } from "@/lib/auth";
 import { postMetadata } from "@/lib/postMetadata";
+import { NO_SEARCH } from "@/lib/noSearch";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,8 @@ type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
-  return postMetadata(board, id);
+  // 주보에는 헌금자 명단·기도 제목 같은 교인 정보가 있어 검색에서 뺀다.
+  return { ...(await postMetadata(board, id)), robots: NO_SEARCH };
 }
 
 function NeighborLink({ post, label, align }: { post: Post | null; label: string; align: "left" | "right" }) {

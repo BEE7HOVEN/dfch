@@ -1,0 +1,5 @@
+# 검색 수집 규칙: 관리자 화면과 R2 사진 고정 주소(메인의 주보 표지·앨범 미리보기)는 수집하지 않는다.
+User-Agent: *
+Allow: /
+Disallow: /admin
+Disallow: /r2/
