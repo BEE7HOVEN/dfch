@@ -11,6 +11,8 @@ export interface Post {
   content: string;
   post_date: string; // YYYY-MM-DD (관리자가 지정하는 글 날짜)
   audio_key: string | null; // R2에 저장된 녹음 파일 위치 (매일의 묵상)
+  link_url: string | null; // 누르면 갈 주소 (메인 배너)
+  ends_on: string | null; // 게시 종료일 YYYY-MM-DD (메인 배너)
   created_at: string;
   updated_at: string;
 }
@@ -24,12 +26,30 @@ export async function getPostsByCategory(
 ): Promise<Post[]> {
   const sql = getSql();
   const rows = await sql`
-    SELECT id, category, title, content, audio_key,
+    SELECT id, category, title, content, audio_key, link_url,
+           ends_on::text AS ends_on,
            post_date::text AS post_date,
            created_at::text AS created_at,
            updated_at::text AS updated_at
     FROM posts
     WHERE category = ${category}
+    ORDER BY post_date DESC, created_at DESC`;
+  return rows as Post[];
+}
+
+// 메인 첫 화면에 지금 걸 배너: 시작일이 지났고 종료일이 없거나 아직 안 지난 것. today는 한국 날짜 YYYY-MM-DD.
+export async function getActiveBanners(today: string): Promise<Post[]> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, category, title, content, audio_key, link_url,
+           ends_on::text AS ends_on,
+           post_date::text AS post_date,
+           created_at::text AS created_at,
+           updated_at::text AS updated_at
+    FROM posts
+    WHERE category = 'banner'
+      AND post_date <= ${today}::date
+      AND (ends_on IS NULL OR ends_on >= ${today}::date)
     ORDER BY post_date DESC, created_at DESC`;
   return rows as Post[];
 }
@@ -41,7 +61,8 @@ export async function getRecentPosts(
 ): Promise<Post[]> {
   const sql = getSql();
   const rows = await sql`
-    SELECT id, category, title, content, audio_key,
+    SELECT id, category, title, content, audio_key, link_url,
+           ends_on::text AS ends_on,
            post_date::text AS post_date,
            created_at::text AS created_at,
            updated_at::text AS updated_at
@@ -55,7 +76,8 @@ export async function getRecentPosts(
 export async function getAllPosts(): Promise<Post[]> {
   const sql = getSql();
   const rows = await sql`
-    SELECT id, category, title, content, audio_key,
+    SELECT id, category, title, content, audio_key, link_url,
+           ends_on::text AS ends_on,
            post_date::text AS post_date,
            created_at::text AS created_at,
            updated_at::text AS updated_at
@@ -68,7 +90,8 @@ export async function getPost(id: string): Promise<Post | null> {
   if (!UUID_RE.test(id)) return null;
   const sql = getSql();
   const rows = await sql`
-    SELECT id, category, title, content, audio_key,
+    SELECT id, category, title, content, audio_key, link_url,
+           ends_on::text AS ends_on,
            post_date::text AS post_date,
            created_at::text AS created_at,
            updated_at::text AS updated_at
@@ -83,11 +106,14 @@ export async function createPost(input: {
   content: string;
   post_date: string;
   audio_key: string | null;
+  link_url?: string | null;
+  ends_on?: string | null;
 }): Promise<string> {
   const sql = getSql();
   const rows = await sql`
-    INSERT INTO posts (category, title, content, post_date, audio_key)
-    VALUES (${input.category}, ${input.title}, ${input.content}, ${input.post_date}, ${input.audio_key})
+    INSERT INTO posts (category, title, content, post_date, audio_key, link_url, ends_on)
+    VALUES (${input.category}, ${input.title}, ${input.content}, ${input.post_date}, ${input.audio_key},
+            ${input.link_url ?? null}, ${input.ends_on ?? null})
     RETURNING id`;
   return (rows[0] as { id: string }).id;
 }
@@ -99,6 +125,8 @@ export async function updatePost(
     content: string;
     post_date: string;
     audio_key: string | null;
+    link_url?: string | null;
+    ends_on?: string | null;
   },
 ): Promise<void> {
   const sql = getSql();
@@ -108,6 +136,8 @@ export async function updatePost(
         content = ${input.content},
         post_date = ${input.post_date},
         audio_key = ${input.audio_key},
+        link_url = ${input.link_url ?? null},
+        ends_on = ${input.ends_on ?? null},
         updated_at = now()
     WHERE id = ${id}`;
 }

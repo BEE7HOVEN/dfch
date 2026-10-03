@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { startTransition, useActionState, useState } from "react";
 import type { FormState } from "@/app/admin/actions";
 import type { Post } from "@/lib/posts";
 import type { Board } from "@/lib/boards";
@@ -31,14 +31,23 @@ export default function PostForm({
   const [uploading, setUploading] = useState(false);
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form
+      // action={formAction}으로 넘기면 React가 저장이 끝난 뒤 칸을 자동으로 비워서,
+      // 오류로 막혔을 때 입력한 내용이 사라진다. 직접 제출해 칸을 그대로 둔다.
+      onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        startTransition(() => formAction(formData));
+      }}
+      className="space-y-6"
+    >
       {post && <input type="hidden" name="id" value={post.id} />}
 
       <input type="hidden" name="category" value={board.category} />
 
       <div>
         <label htmlFor="post_date" className="block text-sm text-[#404040] mb-2">
-          날짜
+          {board.dateLabel ?? "날짜"}
         </label>
         <input
           id="post_date"
@@ -64,6 +73,40 @@ export default function PostForm({
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#404040]/30"
         />
       </div>
+
+      {board.bannerFields && (
+        <>
+          <div>
+            <label htmlFor="ends_on" className="block text-sm text-[#404040] mb-2">
+              게시 종료일 (선택)
+            </label>
+            <input
+              id="ends_on"
+              name="ends_on"
+              type="date"
+              defaultValue={post?.ends_on ?? ""}
+              className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#404040]/30"
+            />
+            <p className="mt-2 text-xs text-[#999]">
+              이 날이 지나면 메인에서 자동으로 내려갑니다. 비워 두면 직접 지울 때까지 보입니다.
+            </p>
+          </div>
+          <div>
+            <label htmlFor="link_url" className="block text-sm text-[#404040] mb-2">
+              누르면 갈 주소 (선택)
+            </label>
+            <input
+              id="link_url"
+              name="link_url"
+              type="text"
+              inputMode="url"
+              defaultValue={post?.link_url ?? ""}
+              placeholder="예: /news/notice/… 또는 https://…"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#404040]/30"
+            />
+          </div>
+        </>
+      )}
 
       {board.hasAudio && (
         <AudioUpload initialKey={post?.audio_key} onBusyChange={setUploading} />

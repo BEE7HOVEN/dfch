@@ -120,7 +120,7 @@ const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 const MAX_PDF_BYTES = 30 * 1024 * 1024;
 const MAX_FILES_PER_REQUEST = 60;
 const ATTACHMENT_KEY_RE =
-  /^(gallery|bulletin)\/\d{4}-\d{2}-\d{2}-[0-9a-f-]{36}(_t)?\.(jpg|pdf)$/;
+  /^(gallery|bulletin|banner)\/\d{4}-\d{2}-\d{2}-[0-9a-f-]{36}(_t)?\.(jpg|pdf)$/;
 
 export type AttachmentUploadTarget =
   | { kind: "image"; fileKey: string; fileUrl: string; thumbKey: string; thumbUrl: string }
@@ -238,6 +238,27 @@ function readRemovedAttachmentIds(formData: FormData): string[] {
   }
 }
 
+// 메인 배너의 링크·종료일. 링크는 http(s) 주소나 사이트 안 경로만 받는다.
+function readBannerFields(
+  formData: FormData,
+  board: Board,
+  postDate: string,
+): { link_url: string | null; ends_on: string | null; error?: string } {
+  if (!board.bannerFields) return { link_url: null, ends_on: null };
+  const link = String(formData.get("link_url") ?? "").trim();
+  const endsOn = String(formData.get("ends_on") ?? "").trim();
+  if (link && (!/^(https?:\/\/|\/(?!\/))/.test(link) || link.length > 500)) {
+    return { link_url: null, ends_on: null, error: "링크는 https:// 로 시작하는 주소나 / 로 시작하는 사이트 안 경로로 적어주세요." };
+  }
+  if (endsOn && !/^\d{4}-\d{2}-\d{2}$/.test(endsOn)) {
+    return { link_url: null, ends_on: null, error: "종료일 형식이 올바르지 않습니다." };
+  }
+  if (endsOn && endsOn < postDate) {
+    return { link_url: null, ends_on: null, error: "종료일은 시작일과 같거나 그 뒤여야 합니다." };
+  }
+  return { link_url: link || null, ends_on: endsOn || null };
+}
+
 // 제목을 비워 둘 수 있는 게시판(주보)은 날짜로 제목을 만든다.
 function defaultTitle(board: Board, postDate: string): string {
   const [y, m, d] = postDate.split("-").map(Number);
@@ -272,15 +293,26 @@ export async function createPostAction(
   const content = String(formData.get("content") ?? "").trim();
   const audio_key = board.hasAudio ? readAudioKey(formData) : null;
   const attachments = readNewAttachments(formData, board);
-  const error = validate(board, {
-    title,
-    content,
-    audio_key,
-    attachmentCount: attachments.length,
-  });
+  const banner = readBannerFields(formData, board, post_date);
+  const error =
+    banner.error ??
+    validate(board, {
+      title,
+      content,
+      audio_key,
+      attachmentCount: attachments.length,
+    });
   if (error) return { error };
 
-  const id = await createPost({ category, title, content, post_date, audio_key });
+  const id = await createPost({
+    category,
+    title,
+    content,
+    post_date,
+    audio_key,
+    link_url: banner.link_url,
+    ends_on: banner.ends_on,
+  });
   await addAttachments(id, attachments);
   revalidatePath(board.path);
   revalidatePath("/"); // 메인의 최근 공지·묵상
@@ -312,15 +344,25 @@ export async function updatePostAction(
   const removedIds = readRemovedAttachmentIds(formData);
   const current = board.attachments ? await getAttachments(id) : [];
   const remaining = current.filter((a) => !removedIds.includes(a.id)).length;
-  const error = validate(board, {
-    title,
-    content,
-    audio_key,
-    attachmentCount: remaining + added.length,
-  });
+  const banner = readBannerFields(formData, board, post_date);
+  const error =
+    banner.error ??
+    validate(board, {
+      title,
+      content,
+      audio_key,
+      attachmentCount: remaining + added.length,
+    });
   if (error) return { error };
 
-  await updatePost(id, { title, content, post_date, audio_key });
+  await updatePost(id, {
+    title,
+    content,
+    post_date,
+    audio_key,
+    link_url: banner.link_url,
+    ends_on: banner.ends_on,
+  });
   await addAttachments(id, added);
   const removedKeys = await removeAttachments(id, removedIds);
   await deleteObjectsQuietly(removedKeys);

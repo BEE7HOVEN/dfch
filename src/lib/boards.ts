@@ -4,7 +4,8 @@ export type BoardCategory =
   | "meditation"
   | "notice"
   | "gallery"
-  | "bulletin";
+  | "bulletin"
+  | "banner";
 
 export interface Board {
   category: BoardCategory;
@@ -19,6 +20,8 @@ export interface Board {
   contentRequired: boolean;
   hasAudio: boolean; // 녹음 파일 첨부(R2) 여부
   attachments?: "images" | "images+pdf"; // 사진(과 PDF) 첨부(R2) 여부
+  dateLabel?: string; // 날짜 칸 이름 (기본 "날짜")
+  bannerFields?: boolean; // 링크 주소·게시 종료일 칸 (메인 배너)
 }
 
 export const boards: Record<BoardCategory, Board> = {
@@ -86,6 +89,23 @@ export const boards: Record<BoardCategory, Board> = {
     contentRequired: false,
     hasAudio: false,
     attachments: "images+pdf",
+  },
+  // 메인 첫 화면 왼쪽 행사 배너. 따로 보는 페이지는 없고 메인에만 나온다.
+  banner: {
+    category: "banner",
+    label: "배너",
+    path: "/",
+    heroImage: "/images/hero-1.jpg",
+    newLabel: "배너 올리기",
+    titleLabel: "배너 이름",
+    titlePlaceholder: "예: 2026 초청음악회 (사진 설명으로도 쓰입니다)",
+    titleRequired: true,
+    contentLabel: "메모 (선택, 화면에 나오지 않음)",
+    contentRequired: false,
+    hasAudio: false,
+    attachments: "images",
+    dateLabel: "게시 시작일",
+    bannerFields: true,
   },
 };
 

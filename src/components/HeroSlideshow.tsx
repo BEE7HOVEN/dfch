@@ -1,4 +1,5 @@
 "use client";
+// 메인의 교회 건물 사진 슬라이드 (행사 배너·주일설교 줄 아래, 화면 폭 전체)
 
 import { useState, useEffect, useCallback } from "react";
 
@@ -31,7 +32,7 @@ export default function HeroSlideshow() {
   }, [next]);
 
   return (
-    <section className="relative h-screen w-full overflow-hidden">
+    <section className="relative mt-12 md:mt-16 h-[56vh] md:h-[78vh] w-full overflow-hidden">
       {slides.map((src, i) => (
         <div
           key={src}
@@ -42,16 +43,7 @@ export default function HeroSlideshow() {
         />
       ))}
 
-      <div className="absolute inset-0 bg-black/30" />
-
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-white text-center px-4">
-        <h1 className="text-3xl md:text-5xl font-light leading-relaxed tracking-wider">
-          말씀이 삶이 되고
-        </h1>
-        <h2 className="text-3xl md:text-5xl font-light leading-relaxed tracking-wider mt-2">
-          나눔이 섬김이 되는 공동체
-        </h2>
-      </div>
+      <div className="absolute inset-0 bg-black/10" />
 
       <button
         onClick={prev}
