@@ -6,12 +6,21 @@ import Image from "next/image";
 const CHANNEL_ID = "UCid-t3mDuI574dotclfPQSA";
 const CHANNEL_URL = "https://www.youtube.com/@군포드림숲교회";
 
+type VideoCategory = "live" | "sunday" | "wednesday";
+
 interface Video {
   id: string;
   title: string;
   published: string;
+  category: VideoCategory | null;
   thumbnail: string;
 }
+
+const TABS: { key: VideoCategory; label: string }[] = [
+  { key: "live", label: "예배실황" },
+  { key: "sunday", label: "주일설교" },
+  { key: "wednesday", label: "수요설교" },
+];
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr);
@@ -22,6 +31,9 @@ export default function YouTubeMedia() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<VideoCategory>(TABS[0].key);
+
+  const tabVideos = videos.filter((v) => v.category === tab);
 
   useEffect(() => {
     fetch(`/api/youtube`)
@@ -36,15 +48,32 @@ export default function YouTubeMedia() {
   return (
     <section className="py-20 md:py-32 px-4">
       <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-12">
-          <h2 className="text-2xl md:text-3xl font-light text-[#404040]">
-            최근 영상
-          </h2>
+        <div className="flex items-center justify-between mb-12 border-b border-gray-100">
+          <div className="flex gap-6 md:gap-10" role="tablist">
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                role="tab"
+                aria-selected={tab === t.key}
+                onClick={() => {
+                  setTab(t.key);
+                  setActiveVideo(null);
+                }}
+                className={`pb-3 -mb-px border-b-2 text-lg md:text-xl transition-colors ${
+                  tab === t.key
+                    ? "border-[#2c2c2c] text-[#2c2c2c]"
+                    : "border-transparent text-[#999] hover:text-[#404040]"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
           <a
             href={CHANNEL_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center w-10 h-10 text-red-600 hover:text-red-700 transition-colors"
+            className="flex items-center justify-center w-10 h-10 mb-2 text-red-600 hover:text-red-700 transition-colors"
             aria-label="YouTube 채널"
           >
             <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
@@ -98,9 +127,13 @@ export default function YouTubeMedia() {
               YouTube 채널에서 직접 보기
             </a>
           </div>
+        ) : tabVideos.length === 0 ? (
+          <p className="text-center py-20 text-[#999]">
+            최근 올라온 영상이 없습니다.
+          </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {videos.map((video) => (
+            {tabVideos.map((video) => (
               <div
                 key={video.id}
                 className={`group cursor-pointer rounded-lg overflow-hidden border transition-all ${
@@ -136,6 +169,19 @@ export default function YouTubeMedia() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {!loading && videos.length > 0 && (
+          <div className="mt-12 text-center">
+            <a
+              href={CHANNEL_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-[#666] hover:text-[#2c2c2c] underline underline-offset-4"
+            >
+              지난 영상은 YouTube에서 더 보기
+            </a>
           </div>
         )}
       </div>

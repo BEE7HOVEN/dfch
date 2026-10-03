@@ -3,6 +3,15 @@ export const runtime = "edge";
 const CHANNEL_ID = "UCid-t3mDuI574dotclfPQSA";
 const RSS_URL = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
 
+// 설교말씀 탭 분류. 재생목록이 갱신되지 않고 있어 영상 제목 규칙으로 나눈다.
+// 예: "... l 드림숲교회 주일설교", "9월 30일 수요", "9월 27일 주일예배"
+function categorize(title: string): "sunday" | "wednesday" | "live" | null {
+  if (title.includes("주일설교")) return "sunday";
+  if (title.includes("수요")) return "wednesday";
+  if (title.includes("주일예배")) return "live";
+  return null;
+}
+
 export async function GET() {
   try {
     const res = await fetch(RSS_URL, {
@@ -23,7 +32,7 @@ export async function GET() {
     }
 
     const entries = text.split("<entry>").slice(1);
-    const videos = entries.slice(0, 12).map((entry) => {
+    const videos = entries.map((entry) => {
       const id = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1] ?? "";
       const title = entry.match(/<title>([^<]+)<\/title>/)?.[1] ?? "";
       const published =
@@ -32,6 +41,7 @@ export async function GET() {
         id,
         title,
         published,
+        category: categorize(title),
         thumbnail: `https://i.ytimg.com/vi/${id}/mqdefault.jpg`,
       };
     });
