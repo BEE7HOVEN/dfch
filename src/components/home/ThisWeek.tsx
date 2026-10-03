@@ -96,7 +96,7 @@ export default async function ThisWeek() {
                     <img
                       src={`/r2/${bulletin.cover.thumb_key}`}
                       alt=""
-                      className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-500"
+                      className={`w-full h-full object-cover ${(bulletin.cover.width ?? 0) > (bulletin.cover.height ?? 0) ? "object-right-top" : "object-top"} group-hover:scale-[1.03] transition-transform duration-500`}
                     />
                   ) : (
                     <span className="text-sm font-semibold text-red-600">PDF</span>

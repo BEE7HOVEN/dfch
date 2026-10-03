@@ -124,6 +124,9 @@ export default function BulletinViewer({
 
   const scale = ZOOMS[zoom];
   const zoomed = scale > 1;
+  // 휴대폰에서는 화면 높이를 첫 쪽 비율에 맞춰 빈 공간을 없앤다 (가로 주보·세로 주보 모두). 모르면 A4 세로.
+  const first = pages[0];
+  const ratio = first.width && first.height ? first.width / first.height : 1 / Math.SQRT2;
 
   return (
     <div
@@ -177,9 +180,14 @@ export default function BulletinViewer({
 
       {/* 쪽 화면: 맞춤일 때는 쪽들을 옆으로 이어 붙여 밀어 넘기고, 확대하면 지금 쪽만 크게 띄워 스크롤한다. */}
       <div
-        className={`relative ${fullscreen ? "flex-1 min-h-0" : "h-[calc((100vw-36px)*1.5)] max-h-[80vh] md:h-[78vh] md:min-h-[460px] md:max-h-[1200px]"}`}
+        className={`relative ${fullscreen ? "flex-1 min-h-0" : "aspect-(--page-ratio) max-h-[80vh] md:aspect-auto md:h-[78vh] md:min-h-[460px] md:max-h-[1200px]"}`}
+        style={{ "--page-ratio": String(ratio) } as React.CSSProperties}
         onTouchStart={(e) => {
-          touchX.current = zoomed ? null : e.touches[0].clientX;
+          // 손가락 하나로 밀 때만 넘긴다 (두 손가락은 확대).
+          touchX.current = zoomed || e.touches.length > 1 ? null : e.touches[0].clientX;
+        }}
+        onTouchMove={(e) => {
+          if (e.touches.length > 1) touchX.current = null;
         }}
         onTouchEnd={(e) => {
           if (touchX.current === null) return;
@@ -206,7 +214,7 @@ export default function BulletinViewer({
               style={{ transform: `translateX(-${index * 100}%)` }}
             >
               {pages.map((p, i) => (
-                <div key={p.url} className="w-full h-full shrink-0 flex items-center justify-center p-4 md:p-6" aria-hidden={i !== index}>
+                <div key={p.url} className="w-full h-full shrink-0 flex items-center justify-center p-2 md:p-6" aria-hidden={i !== index}>
                   {/* eslint-disable-next-line @next/next/no-img-element -- R2 서명 주소라 next/image 최적화를 쓰지 않는다. */}
                   <img
                     src={p.url}
@@ -255,7 +263,8 @@ export default function BulletinViewer({
               onClick={() => go(i)}
               aria-label={`${i + 1}쪽으로`}
               aria-current={i === index ? "page" : undefined}
-              className={`relative shrink-0 w-12 md:w-14 aspect-[3/4] overflow-hidden rounded-md border-2 transition-colors ${
+              style={{ aspectRatio: p.width && p.height ? `${p.width} / ${p.height}` : "3 / 4" }}
+              className={`relative shrink-0 h-16 md:h-[72px] overflow-hidden rounded-md border-2 transition-colors ${
                 i === index ? "border-forest" : "border-transparent opacity-60 hover:opacity-100"
               }`}
             >

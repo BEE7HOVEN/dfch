@@ -14,13 +14,14 @@ export const dynamic = "force-dynamic";
 
 const board = boards.bulletin;
 
-function Cover({ url, className }: { url?: string; className: string }) {
+// 접는 가로 주보는 첫 장 오른쪽 칸이 표지라, 가로 쪽은 오른쪽을 기준으로 잘라 보여 준다.
+function Cover({ url, landscape, className }: { url?: string; landscape?: boolean; className: string }) {
   return (
     <div className={`${className} overflow-hidden bg-paper border border-line flex items-center justify-center`}>
       {url ? (
         // R2 서명 주소라 next/image 최적화(무료 한도 있음)를 쓰지 않는다.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={url} alt="" className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-500" />
+        <img src={url} alt="" className={`w-full h-full object-cover ${landscape ? "object-right-top" : "object-top"} group-hover:scale-[1.03] transition-transform duration-500`} />
       ) : (
         <span className="text-sm font-semibold text-red-600">PDF</span>
       )}
@@ -42,6 +43,10 @@ export default async function BulletinPage() {
     }),
   );
   const [latest, ...past] = bulletins;
+  const isLandscape = (id: string) => {
+    const c = covers.get(id)?.cover;
+    return Boolean(c?.width && c?.height && c.width > c.height);
+  };
 
   return (
     <>
@@ -67,6 +72,7 @@ export default async function BulletinPage() {
               >
                 <Cover
                   url={coverUrls.get(latest.id)}
+                  landscape={isLandscape(latest.id)}
                   className="w-full max-w-[360px] mx-auto aspect-[3/4] rounded-xl shadow-[0_16px_40px_rgba(31,36,33,0.14)]"
                 />
                 <div>
@@ -86,7 +92,7 @@ export default async function BulletinPage() {
                     {past.map((b) => (
                       <li key={b.id}>
                         <Link href={`${board.path}/${b.id}`} className="group block">
-                          <Cover url={coverUrls.get(b.id)} className="aspect-[3/4] rounded-[16px]" />
+                          <Cover url={coverUrls.get(b.id)} landscape={isLandscape(b.id)} className="aspect-[3/4] rounded-[16px]" />
                           <h3 className="mt-3.5 text-[15px] md:text-base font-semibold text-ink line-clamp-2 group-hover:text-forest">
                             {b.title}
                           </h3>
