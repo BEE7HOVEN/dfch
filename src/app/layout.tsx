@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import "./globals.css";
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const quicksand = Quicksand({
   subsets: ["latin"],
@@ -9,8 +10,15 @@ const quicksand = Quicksand({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "드림숲교회",
   description: "말씀이 삶이 되고 나눔이 섬김이 되는 공동체 - 드림숲교회",
+  openGraph: {
+    siteName: SITE_NAME,
+    locale: "ko_KR",
+    type: "website",
+    images: [DEFAULT_OG_IMAGE],
+  },
 };
 
 export default function RootLayout({

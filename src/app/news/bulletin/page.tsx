@@ -1,6 +1,9 @@
-// 교회소식 > 주보 (준비 중)
-import ComingSoon from "@/components/ComingSoon";
+// 교회소식 > 주보 목록 (최신 날짜가 위)
+import BoardList from "@/components/BoardList";
+import { boards } from "@/lib/boards";
+
+export const dynamic = "force-dynamic";
 
 export default function BulletinPage() {
-  return <ComingSoon title="주보" image="/images/hero-2.jpg" />;
+  return <BoardList board={boards.bulletin} />;
 }

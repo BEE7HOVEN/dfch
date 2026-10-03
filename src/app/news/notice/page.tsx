@@ -1,6 +1,9 @@
-// 교회소식 > 공지사항 (준비 중)
-import ComingSoon from "@/components/ComingSoon";
+// 교회소식 > 공지사항 목록
+import BoardList from "@/components/BoardList";
+import { boards } from "@/lib/boards";
+
+export const dynamic = "force-dynamic";
 
 export default function NoticePage() {
-  return <ComingSoon title="공지사항" image="/images/hero-6.jpg" />;
+  return <BoardList board={boards.notice} />;
 }

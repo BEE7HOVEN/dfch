@@ -4,33 +4,7 @@
 import { useState } from "react";
 import { createAudioUploadAction } from "@/app/admin/actions";
 import { isWav, wavToMp3 } from "./wavToMp3";
-
-function formatMB(bytes: number) {
-  return `${(bytes / 1024 / 1024).toFixed(1)}MB`;
-}
-
-// fetch는 업로드 진행률을 알 수 없어 XMLHttpRequest를 쓴다.
-function putWithProgress(
-  url: string,
-  file: File,
-  contentType: string,
-  onProgress: (percent: number) => void,
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("PUT", url);
-    xhr.setRequestHeader("Content-Type", contentType);
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
-    };
-    xhr.onload = () =>
-      xhr.status >= 200 && xhr.status < 300
-        ? resolve()
-        : reject(new Error(`업로드 실패: ${xhr.status}`));
-    xhr.onerror = () => reject(new Error("업로드 중 네트워크 오류"));
-    xhr.send(file);
-  });
-}
+import { formatMB, putWithProgress } from "./upload";
 
 export default function AudioUpload({
   initialKey,

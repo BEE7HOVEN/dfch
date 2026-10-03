@@ -1,6 +1,8 @@
 import { getSql } from "@/lib/db";
+import type { BoardCategory } from "@/lib/boards";
 
-export type PostCategory = "letter" | "meditation" | "news";
+// "news"는 예전 스키마에 있던 분류값이라 남겨 둔다.
+export type PostCategory = BoardCategory | "news";
 
 export interface Post {
   id: string;
@@ -63,11 +65,13 @@ export async function createPost(input: {
   content: string;
   post_date: string;
   audio_key: string | null;
-}): Promise<void> {
+}): Promise<string> {
   const sql = getSql();
-  await sql`
+  const rows = await sql`
     INSERT INTO posts (category, title, content, post_date, audio_key)
-    VALUES (${input.category}, ${input.title}, ${input.content}, ${input.post_date}, ${input.audio_key})`;
+    VALUES (${input.category}, ${input.title}, ${input.content}, ${input.post_date}, ${input.audio_key})
+    RETURNING id`;
+  return (rows[0] as { id: string }).id;
 }
 
 export async function updatePost(
@@ -93,4 +97,85 @@ export async function updatePost(
 export async function deletePost(id: string): Promise<void> {
   const sql = getSql();
   await sql`DELETE FROM posts WHERE id = ${id}`;
+}
+
+// ── 첨부 파일 (갤러리 사진, 주보 사진·PDF). 파일은 R2, 여기는 위치·크기만. ──
+
+export interface Attachment {
+  id: string;
+  post_id: string;
+  kind: "image" | "pdf";
+  file_key: string;
+  thumb_key: string | null;
+  width: number | null;
+  height: number | null;
+  file_name: string | null;
+  size_bytes: number | null;
+  sort_order: number;
+}
+
+export type NewAttachment = Omit<Attachment, "id" | "post_id" | "sort_order">;
+
+export async function getAttachments(postId: string): Promise<Attachment[]> {
+  if (!UUID_RE.test(postId)) return [];
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, post_id, kind, file_key, thumb_key, width, height, file_name, size_bytes, sort_order
+    FROM attachments
+    WHERE post_id = ${postId}
+    ORDER BY sort_order, created_at`;
+  return rows as Attachment[];
+}
+
+// 갤러리 목록용: 글마다 첫 사진(표지)과 사진 수.
+export async function getAlbumCovers(
+  postIds: string[],
+): Promise<Map<string, { cover: Attachment; count: number }>> {
+  const result = new Map<string, { cover: Attachment; count: number }>();
+  if (postIds.length === 0) return result;
+  const sql = getSql();
+  const rows = (await sql`
+    SELECT id, post_id, kind, file_key, thumb_key, width, height, file_name, size_bytes, sort_order
+    FROM attachments
+    WHERE post_id = ANY(${postIds}::uuid[]) AND kind = 'image'
+    ORDER BY post_id, sort_order, created_at`) as Attachment[];
+  for (const row of rows) {
+    const entry = result.get(row.post_id);
+    if (entry) entry.count++;
+    else result.set(row.post_id, { cover: row, count: 1 });
+  }
+  return result;
+}
+
+export async function addAttachments(
+  postId: string,
+  items: NewAttachment[],
+): Promise<void> {
+  if (items.length === 0) return;
+  const sql = getSql();
+  const [{ next }] = (await sql`
+    SELECT COALESCE(MAX(sort_order) + 1, 0)::int AS next
+    FROM attachments WHERE post_id = ${postId}`) as { next: number }[];
+  for (const [i, a] of items.entries()) {
+    await sql`
+      INSERT INTO attachments
+        (post_id, kind, file_key, thumb_key, width, height, file_name, size_bytes, sort_order)
+      VALUES (${postId}, ${a.kind}, ${a.file_key}, ${a.thumb_key}, ${a.width}, ${a.height},
+              ${a.file_name}, ${a.size_bytes}, ${next + i})`;
+  }
+}
+
+// 지운 첨부의 R2 위치를 돌려준다(호출하는 쪽에서 R2 파일을 지운다).
+export async function removeAttachments(
+  postId: string,
+  ids: string[],
+): Promise<string[]> {
+  const valid = ids.filter((id) => UUID_RE.test(id));
+  if (valid.length === 0) return [];
+  const sql = getSql();
+  const rows = (await sql`
+    DELETE FROM attachments
+    WHERE post_id = ${postId} AND id = ANY(${valid}::uuid[])
+    RETURNING file_key, thumb_key`) as { file_key: string; thumb_key: string | null }[];
+  return rows.flatMap((r) => [r.file_key, r.thumb_key].filter((k): k is string => !!k));
 }

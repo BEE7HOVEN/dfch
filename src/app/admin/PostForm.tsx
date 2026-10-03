@@ -6,11 +6,13 @@ import type { FormState } from "@/app/admin/actions";
 import type { Post } from "@/lib/posts";
 import type { Board } from "@/lib/boards";
 import AudioUpload from "./AudioUpload";
+import AttachmentUpload, { type ExistingAttachment } from "./AttachmentUpload";
 
 interface PostFormProps {
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
   board: Board;
   post?: Post;
+  existingAttachments?: ExistingAttachment[];
   defaultDate: string; // YYYY-MM-DD
   submitLabel: string;
 }
@@ -21,6 +23,7 @@ export default function PostForm({
   action,
   board,
   post,
+  existingAttachments,
   defaultDate,
   submitLabel,
 }: PostFormProps) {
@@ -57,7 +60,7 @@ export default function PostForm({
           type="text"
           defaultValue={post?.title ?? ""}
           placeholder={board.titlePlaceholder}
-          required
+          required={board.titleRequired}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#404040]/30"
         />
       </div>
@@ -66,9 +69,18 @@ export default function PostForm({
         <AudioUpload initialKey={post?.audio_key} onBusyChange={setUploading} />
       )}
 
+      {board.attachments && (
+        <AttachmentUpload
+          category={board.category}
+          mode={board.attachments}
+          existing={existingAttachments}
+          onBusyChange={setUploading}
+        />
+      )}
+
       <div>
         <label htmlFor="content" className="block text-sm text-[#404040] mb-2">
-          {board.contentRequired ? "내용" : "메모 (선택)"}
+          {board.contentLabel}
         </label>
         <textarea
           id="content"

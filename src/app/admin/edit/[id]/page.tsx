@@ -4,7 +4,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import { requireAuth } from "@/lib/auth";
-import { getPost } from "@/lib/posts";
+import { getAttachments, getPost } from "@/lib/posts";
+import { withViewUrls } from "@/lib/attachmentUrls";
 import { boards, isBoardCategory } from "@/lib/boards";
 import { updatePostAction } from "../../actions";
 import PostForm from "../../PostForm";
@@ -22,6 +23,9 @@ export default async function EditPostPage({
   const post = await getPost(id);
   if (!post || !isBoardCategory(post.category)) notFound();
   const board = boards[post.category];
+  const attachments = board.attachments
+    ? await withViewUrls(await getAttachments(post.id))
+    : [];
 
   return (
     <>
@@ -43,6 +47,12 @@ export default async function EditPostPage({
             action={updatePostAction}
             board={board}
             post={post}
+            existingAttachments={attachments.map((a) => ({
+              id: a.id,
+              kind: a.kind,
+              thumbUrl: a.thumbUrl,
+              fileName: a.file_name,
+            }))}
             defaultDate={post.post_date}
             submitLabel="수정 저장"
           />
