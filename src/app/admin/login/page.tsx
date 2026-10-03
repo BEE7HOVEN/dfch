@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import Hero from "@/components/Hero";
+import PageHeader from "@/components/PageHeader";
 import { isAuthenticated } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import LoginForm from "./LoginForm";
@@ -15,14 +15,11 @@ export default async function LoginPage() {
   return (
     <>
       <Header />
-      <main className="pt-16">
-        <Hero image="/images/hero-5.jpg" title="글 관리" />
-        <section className="px-4 py-16 flex justify-center">
+      <main>
+        <PageHeader path="/admin" title="관리자 로그인" />
+        <section className="shell pb-20 md:pb-28">
           <div className="w-full max-w-sm">
-            <h2 className="text-center text-lg font-light text-[#2c2c2c] mb-6">
-              관리자 로그인
-            </h2>
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-line">
               <LoginForm />
             </div>
           </div>

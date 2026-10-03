@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import Hero from "@/components/Hero";
+import PageHeader from "@/components/PageHeader";
 import { requireAuth } from "@/lib/auth";
 import { getAttachments, getPost } from "@/lib/posts";
 import { withViewUrls } from "@/lib/attachmentUrls";
@@ -30,17 +30,18 @@ export default async function EditPostPage({
   return (
     <>
       <Header />
-      <main className="pt-16 min-h-[60vh]">
-        <Hero image="/images/hero-5.jpg" title="글 관리" />
-        <section className="max-w-2xl mx-auto px-4 py-12 md:py-16">
+      <main className="min-h-[60vh]">
+        <PageHeader path="/admin" title="글 관리" />
+        <section className="shell pb-20 md:pb-28">
+          <div className="max-w-[860px]">
           <div className="mb-8">
             <Link
               href="/admin"
-              className="text-sm text-[#999] hover:text-[#2c2c2c] transition-colors"
+              className="text-sm text-mute hover:text-forest transition-colors"
             >
               ← 글 관리
             </Link>
-            <h1 className="text-2xl font-light text-[#2c2c2c] mt-2">글 수정</h1>
+            <h1 className="text-2xl font-bold text-ink mt-2">글 수정</h1>
           </div>
 
           <PostForm
@@ -57,9 +58,10 @@ export default async function EditPostPage({
             submitLabel="수정 저장"
           />
 
-          <div className="mt-10 pt-6 border-t border-gray-100 flex items-center justify-between">
-            <p className="text-sm text-[#999]">이 글을 삭제할까요?</p>
+          <div className="mt-10 pt-6 border-t border-line flex items-center justify-between">
+            <p className="text-sm text-mute">이 글을 삭제할까요?</p>
             <DeleteButton id={post.id} />
+          </div>
           </div>
         </section>
       </main>

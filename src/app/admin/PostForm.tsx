@@ -46,7 +46,7 @@ export default function PostForm({
       <input type="hidden" name="category" value={board.category} />
 
       <div>
-        <label htmlFor="post_date" className="block text-sm text-[#404040] mb-2">
+        <label htmlFor="post_date" className="block text-sm text-sub mb-2">
           {board.dateLabel ?? "날짜"}
         </label>
         <input
@@ -55,12 +55,12 @@ export default function PostForm({
           type="date"
           defaultValue={defaultDate}
           required
-          className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#404040]/30"
+          className="px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-forest/30"
         />
       </div>
 
       <div>
-        <label htmlFor="title" className="block text-sm text-[#404040] mb-2">
+        <label htmlFor="title" className="block text-sm text-sub mb-2">
           {board.titleLabel}
         </label>
         <input
@@ -70,14 +70,14 @@ export default function PostForm({
           defaultValue={post?.title ?? ""}
           placeholder={board.titlePlaceholder}
           required={board.titleRequired}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#404040]/30"
+          className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-forest/30"
         />
       </div>
 
       {board.bannerFields && (
         <>
           <div>
-            <label htmlFor="ends_on" className="block text-sm text-[#404040] mb-2">
+            <label htmlFor="ends_on" className="block text-sm text-sub mb-2">
               게시 종료일 (선택)
             </label>
             <input
@@ -85,14 +85,14 @@ export default function PostForm({
               name="ends_on"
               type="date"
               defaultValue={post?.ends_on ?? ""}
-              className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#404040]/30"
+              className="px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-forest/30"
             />
-            <p className="mt-2 text-xs text-[#999]">
+            <p className="mt-2 text-xs text-mute">
               이 날이 지나면 메인에서 자동으로 내려갑니다. 비워 두면 직접 지울 때까지 보입니다.
             </p>
           </div>
           <div>
-            <label htmlFor="link_url" className="block text-sm text-[#404040] mb-2">
+            <label htmlFor="link_url" className="block text-sm text-sub mb-2">
               누르면 갈 주소 (선택)
             </label>
             <input
@@ -102,7 +102,7 @@ export default function PostForm({
               inputMode="url"
               defaultValue={post?.link_url ?? ""}
               placeholder="예: /news/notice/… 또는 https://…"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#404040]/30"
+              className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-forest/30"
             />
           </div>
         </>
@@ -122,7 +122,7 @@ export default function PostForm({
       )}
 
       <div>
-        <label htmlFor="content" className="block text-sm text-[#404040] mb-2">
+        <label htmlFor="content" className="block text-sm text-sub mb-2">
           {board.contentLabel}
         </label>
         <textarea
@@ -131,9 +131,9 @@ export default function PostForm({
           rows={board.contentRequired ? 16 : 5}
           defaultValue={post?.content ?? ""}
           required={board.contentRequired}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#404040]/30 leading-relaxed resize-y"
+          className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-forest/30 leading-relaxed resize-y"
         />
-        <p className="mt-2 text-xs text-[#999]">
+        <p className="mt-2 text-xs text-mute">
           줄바꿈은 그대로 화면에 표시됩니다. 문단을 나누려면 엔터를 눌러주세요.
         </p>
       </div>
@@ -144,13 +144,13 @@ export default function PostForm({
         <button
           type="submit"
           disabled={pending || uploading}
-          className="px-6 py-3 bg-[#2c2c2c] text-white rounded-lg hover:bg-[#404040] transition-colors disabled:opacity-50"
+          className="px-6 py-3 bg-forest text-white rounded-lg hover:bg-forest-deep transition-colors disabled:opacity-50"
         >
           {pending ? "저장 중..." : uploading ? "업로드 중..." : submitLabel}
         </button>
         <Link
           href="/admin"
-          className="px-6 py-3 text-[#404040] hover:text-[#2c2c2c] transition-colors"
+          className="px-6 py-3 text-sub hover:text-forest transition-colors"
         >
           취소
         </Link>

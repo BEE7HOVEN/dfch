@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import Hero from "@/components/Hero";
+import PageHeader from "@/components/PageHeader";
 import { requireAuth } from "@/lib/auth";
 import { seoulToday } from "@/lib/format";
 import { boards, isBoardCategory } from "@/lib/boards";
@@ -24,17 +24,18 @@ export default async function NewPostPage({
   return (
     <>
       <Header />
-      <main className="pt-16 min-h-[60vh]">
-        <Hero image="/images/hero-5.jpg" title="글 관리" />
-        <section className="max-w-2xl mx-auto px-4 py-12 md:py-16">
+      <main className="min-h-[60vh]">
+        <PageHeader path="/admin" title="글 관리" />
+        <section className="shell pb-20 md:pb-28">
+          <div className="max-w-[860px]">
           <div className="mb-8">
             <Link
               href="/admin"
-              className="text-sm text-[#999] hover:text-[#2c2c2c] transition-colors"
+              className="text-sm text-mute hover:text-forest transition-colors"
             >
               ← 글 관리
             </Link>
-            <h1 className="text-2xl font-light text-[#2c2c2c] mt-2">
+            <h1 className="text-2xl font-bold text-ink mt-2">
               {board.newLabel}
             </h1>
           </div>
@@ -45,6 +46,7 @@ export default async function NewPostPage({
             defaultDate={seoulToday()}
             submitLabel="발행하기"
           />
+          </div>
         </section>
       </main>
       <Footer />

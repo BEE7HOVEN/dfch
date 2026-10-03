@@ -13,7 +13,7 @@ export default function LoginForm() {
       <div>
         <label
           htmlFor="password"
-          className="block text-sm text-[#404040] mb-2"
+          className="block text-sm text-sub mb-2"
         >
           관리자 비밀번호
         </label>
@@ -23,7 +23,7 @@ export default function LoginForm() {
           type="password"
           autoComplete="current-password"
           required
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#404040]/30"
+          className="w-full px-4 py-3 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-forest/30"
         />
       </div>
 
@@ -34,7 +34,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="w-full py-3 bg-[#2c2c2c] text-white rounded-lg hover:bg-[#404040] transition-colors disabled:opacity-50"
+        className="w-full py-3 bg-forest text-white rounded-lg hover:bg-forest-deep transition-colors disabled:opacity-50"
       >
         {pending ? "확인 중..." : "로그인"}
       </button>

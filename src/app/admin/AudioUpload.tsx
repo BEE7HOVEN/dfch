@@ -68,7 +68,7 @@ export default function AudioUpload({
 
   return (
     <div>
-      <label htmlFor="audio" className="block text-sm text-[#404040] mb-2">
+      <label htmlFor="audio" className="block text-sm text-sub mb-2">
         녹음 파일
       </label>
       <input
@@ -77,25 +77,25 @@ export default function AudioUpload({
         accept="audio/*,.m4a,.mp3,.wav,.aac,.amr,.3gp"
         onChange={handleChange}
         disabled={progress !== null}
-        className="block w-full text-sm text-[#404040] file:mr-4 file:px-4 file:py-2.5 file:rounded-lg file:border-0 file:bg-gray-100 file:text-[#404040] hover:file:bg-gray-200"
+        className="block w-full text-sm text-sub file:mr-4 file:px-4 file:py-2.5 file:rounded-lg file:border-0 file:bg-mist file:text-forest hover:file:bg-line"
       />
       <input type="hidden" name="audio_key" value={key} />
 
       {progress !== null ? (
         <div className="mt-3">
-          <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+          <div className="h-2 rounded-full bg-paper overflow-hidden">
             <div
-              className="h-full bg-[#2c2c2c] transition-[width]"
+              className="h-full bg-forest transition-[width]"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="mt-2 text-xs text-[#666]">
+          <p className="mt-2 text-xs text-sub">
             {phase === "convert" ? "MP3로 바꾸는 중..." : "올리는 중..."}{" "}
             {progress}%
           </p>
         </div>
       ) : (
-        <p className="mt-2 text-xs text-[#999]">
+        <p className="mt-2 text-xs text-mute">
           {fileName
             ? `${fileName} 업로드 완료${sizeNote ? ` (${sizeNote})` : ""}`
             : key

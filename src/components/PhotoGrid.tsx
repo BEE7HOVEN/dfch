@@ -57,7 +57,7 @@ export default function PhotoGrid({ photos, title }: { photos: PhotoItem[]; titl
             <button
               type="button"
               onClick={() => setOpen(i)}
-              className="block w-full aspect-square overflow-hidden rounded-md bg-gray-100"
+              className="block w-full aspect-square overflow-hidden rounded-md bg-paper"
               aria-label={`${title} 사진 ${i + 1} 크게 보기`}
             >
               {/* R2 서명 주소라 next/image 최적화(무료 한도 있음)를 쓰지 않는다. */}

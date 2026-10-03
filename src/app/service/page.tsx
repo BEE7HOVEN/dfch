@@ -1,33 +1,41 @@
+// 교회 안내 > 예배 안내 페이지 (예배 시간)
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import Hero from "@/components/Hero";
+import PageHeader from "@/components/PageHeader";
+
+const SERVICES = [
+  { name: "주일예배", day: "일요일", time: "오전 11시" },
+  { name: "수요예배", day: "수요일", time: "저녁 7시 30분" },
+  { name: "새벽묵상", day: "매일 (온라인)", time: "오전 6시" },
+];
 
 export default function ServicePage() {
   return (
     <>
       <Header />
-      <main className="pt-16">
-        <Hero image="/images/service-hero.jpg" title="예배안내" />
+      <main>
+        <PageHeader path="/service" />
 
-        <section className="py-20 md:py-32 px-4">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-light text-center mb-16 text-[#404040]">
-              예배시간
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
-              <div className="text-center p-8 border border-gray-100 rounded-lg">
-                <h3 className="text-lg font-medium mb-2">주일예배</h3>
-                <p className="text-[#666]">일요일 오전 11시</p>
-              </div>
-              <div className="text-center p-8 border border-gray-100 rounded-lg">
-                <h3 className="text-lg font-medium mb-2">수요예배</h3>
-                <p className="text-[#666]">수요일 저녁 7시 30분</p>
-              </div>
-              <div className="text-center p-8 border border-gray-100 rounded-lg">
-                <h3 className="text-lg font-medium mb-2">새벽묵상</h3>
-                <p className="text-[#666]">매일 오전 6시 (온라인)</p>
-              </div>
+        <section className="shell pb-20 md:pb-28">
+          <div className="border-t-2 border-ink pt-10 md:pt-14">
+            <h2 className="text-[22px] md:text-[26px] font-bold text-ink">예배시간</h2>
+            <ul className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+              {SERVICES.map((s) => (
+                <li key={s.name} className="rounded-[24px] bg-mist p-7 md:p-9">
+                  <p className="text-sm font-semibold text-forest">{s.name}</p>
+                  <p className="mt-5 text-[28px] md:text-[32px] font-bold leading-none text-ink">{s.time}</p>
+                  <p className="mt-3 text-[15px] text-sub">{s.day}</p>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-10 flex flex-wrap gap-3">
+              <Link href="/location" className="rounded-full bg-forest px-6 py-3 text-sm font-semibold text-white hover:bg-forest-deep transition-colors">
+                오시는 길 보기
+              </Link>
+              <Link href="/media" className="rounded-full border border-line px-6 py-3 text-sm font-semibold text-sub hover:border-forest hover:text-forest transition-colors">
+                설교말씀 다시 보기
+              </Link>
             </div>
           </div>
         </section>

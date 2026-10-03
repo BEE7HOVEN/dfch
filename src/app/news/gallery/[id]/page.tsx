@@ -1,11 +1,10 @@
 // 교회소식 > 갤러리 앨범 화면 (사진 바둑판, 누르면 크게 보기)
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import Hero from "@/components/Hero";
+import PageHeader from "@/components/PageHeader";
+import { ArticleHead, BackToList } from "@/components/BoardDetail";
 import PhotoGrid from "@/components/PhotoGrid";
-import ShareButton from "@/components/ShareButton";
 import { boards } from "@/lib/boards";
 import { getAttachments, getPost } from "@/lib/posts";
 import { withViewUrls } from "@/lib/attachmentUrls";
@@ -42,42 +41,25 @@ export default async function AlbumPage({ params }: Props) {
   return (
     <>
       <Header />
-      <main className="pt-16">
-        <Hero
-          image={board.heroImage}
-          title={album.title}
-          subtitle={`${formatPostDate(album.post_date)} · 사진 ${photos.length}장`}
-        />
+      <main>
+        <PageHeader path={board.path} />
 
-        <section className="max-w-5xl mx-auto px-4 py-12 md:py-16">
-          <div className="flex items-center justify-end gap-5 mb-6">
-            <ShareButton title={album.title} />
-            {isAdmin && (
-              <Link
-                href={`/admin/edit/${album.id}`}
-                className="text-sm text-[#666] hover:text-[#2c2c2c] transition-colors"
-              >
-                수정
-              </Link>
-            )}
-          </div>
+        <section className="shell pb-20 md:pb-28">
+          <ArticleHead
+            title={album.title}
+            meta={`${formatPostDate(album.post_date)} · 사진 ${photos.length}장`}
+            editHref={isAdmin ? `/admin/edit/${album.id}` : undefined}
+          />
 
           {album.content && (
-            <p className="whitespace-pre-wrap leading-[2] text-base text-[#404040] mb-8">
-              {album.content}
-            </p>
+            <p className="reading pt-8 whitespace-pre-wrap leading-[1.9] text-base text-sub">{album.content}</p>
           )}
 
-          <PhotoGrid photos={photos} title={album.title} />
-
-          <div className="mt-16 pt-8 border-t border-gray-100 text-center">
-            <Link
-              href={board.path}
-              className="text-sm text-[#666] hover:text-[#2c2c2c] transition-colors"
-            >
-              ← 앨범 목록으로
-            </Link>
+          <div className="pt-8 md:pt-10">
+            <PhotoGrid photos={photos} title={album.title} />
           </div>
+
+          <BackToList href={board.path} label="앨범 목록으로" />
         </section>
       </main>
       <Footer />

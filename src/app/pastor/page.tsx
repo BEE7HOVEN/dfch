@@ -1,33 +1,35 @@
+// 교회 안내 > 섬기는 분들 페이지 (담임목사 인사말)
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import Hero from "@/components/Hero";
+import PageHeader from "@/components/PageHeader";
 import Image from "next/image";
 
 export default function PastorPage() {
   return (
     <>
       <Header />
-      <main className="pt-16">
-        <Hero image="/images/pastor-hero.jpg" title="섬기는 분들" />
+      <main>
+        <PageHeader path="/pastor" />
 
-        <section className="py-20 md:py-32 px-4">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-light text-center mb-16 text-[#404040]">
-              담임목사가 드리는 편지
-            </h2>
-
-            <div className="flex flex-col md:flex-row gap-12 items-start">
-              <div className="w-full md:w-1/3 flex-shrink-0">
+        <section className="shell pb-20 md:pb-28">
+          <div className="border-t-2 border-ink pt-10 md:pt-14">
+            <div className="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-10 lg:gap-20 items-start">
+              <div className="md:sticky md:top-[112px]">
                 <Image
                   src="/images/pastor-photo.jpeg"
                   alt="담임목사 조성호"
                   width={300}
                   height={300}
-                  className="rounded-lg w-full"
+                  loading="eager"
+                  className="rounded-[24px] w-full max-w-[420px]"
+                  sizes="(max-width: 768px) 100vw, 420px"
                 />
+                <p className="mt-5 text-sm font-semibold text-forest">담임목사</p>
+                <p className="mt-1 text-2xl font-bold text-ink">조성호</p>
               </div>
 
-              <div className="flex-1 space-y-6 text-base leading-[2] text-[#404040]">
+              <div className="space-y-6 text-base md:text-[17px] leading-[2] text-sub">
+                <h2 className="text-[22px] md:text-[28px] font-bold leading-snug text-ink">담임목사가 드리는 편지</h2>
                 <p>
                   드림숲교회에 오신 여러분을 환영합니다.
                 </p>
@@ -94,7 +96,7 @@ export default function PastorPage() {
                   기쁨으로 초청합니다.
                 </p>
 
-                <p className="text-right mt-8 font-medium">
+                <p className="text-right mt-8 font-semibold text-ink">
                   담임목사 &nbsp;조 성 호
                 </p>
               </div>

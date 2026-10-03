@@ -31,7 +31,7 @@ export default function ShareButton({ title }: { title: string }) {
     <button
       type="button"
       onClick={share}
-      className="inline-flex items-center gap-1.5 text-sm text-[#666] hover:text-[#2c2c2c] transition-colors"
+      className="inline-flex items-center gap-1.5 text-sm text-sub hover:text-forest transition-colors"
     >
       <svg
         className="w-4 h-4"
