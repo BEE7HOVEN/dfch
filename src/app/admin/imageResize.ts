@@ -56,10 +56,11 @@ function draw(
 
 export async function resizeForUpload(
   file: File,
+  { maxSide = 2000, quality = 0.85 }: { maxSide?: number; quality?: number } = {},
 ): Promise<{ full: ResizedImage; thumb: ResizedImage }> {
   const source = await decode(file);
   try {
-    const full = await draw(source, 2000, 0.85);
+    const full = await draw(source, maxSide, quality);
     const thumb = await draw(source, 600, 0.8);
     return { full, thumb };
   } finally {

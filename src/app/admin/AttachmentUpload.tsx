@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { createAttachmentUploadAction } from "@/app/admin/actions";
 import { resizeForUpload } from "./imageResize";
 import { putWithProgress } from "./upload";
-import { pdfToPageImages } from "./pdfPages";
+import { PDF_PAGE_LONG_SIDE, PDF_PAGE_QUALITY, pdfToPageImages } from "./pdfPages";
 
 export interface ExistingAttachment {
   id: string;
@@ -32,6 +32,10 @@ function isPdf(file: File) {
   return file.type === "application/pdf" || /\.pdf$/i.test(file.name);
 }
 
+function isHwp(file: File) {
+  return /\.hwpx?$/i.test(file.name);
+}
+
 export default function AttachmentUpload({
   category,
   mode,
@@ -48,6 +52,7 @@ export default function AttachmentUpload({
   const [error, setError] = useState<string | null>(null);
   const [splitting, setSplitting] = useState(false); // PDF 쪽을 사진으로 바꾸는 중
   const previews = useRef<string[]>([]);
+  const pdfPages = useRef(new WeakSet<File>()); // PDF에서 바꾼 쪽 사진 (더 크게 올림)
 
   const busy = splitting || items.some((i) => ["waiting", "converting", "uploading"].includes(i.status));
   useEffect(() => onBusyChange(busy), [busy, onBusyChange]);
@@ -77,7 +82,10 @@ export default function AttachmentUpload({
       }
 
       update(item.tempId, { status: "converting" });
-      const { full, thumb } = await resizeForUpload(file);
+      const { full, thumb } = await resizeForUpload(
+        file,
+        pdfPages.current.has(file) ? { maxSide: PDF_PAGE_LONG_SIDE, quality: PDF_PAGE_QUALITY } : undefined,
+      );
       const preview = URL.createObjectURL(thumb.blob);
       previews.current.push(preview);
       update(item.tempId, { status: "uploading", preview });
@@ -121,8 +129,13 @@ export default function AttachmentUpload({
     if (files.length === 0) return;
     setError(null);
 
-    const picked = files.filter((f) => mode === "images+pdf" || !isPdf(f));
-    if (picked.length < files.length) setError("PDF는 올릴 수 없습니다. 사진만 골라주세요.");
+    // 한글 파일은 브라우저가 열 수 없어 PDF로 바꿔 올리도록 안내한다.
+    if (files.some(isHwp)) {
+      setError("한글(HWP) 파일은 바로 올릴 수 없습니다. 한글에서 [파일] → [PDF로 저장하기]로 PDF를 만들어 올려 주세요.");
+    }
+    const notHwp = files.filter((f) => !isHwp(f));
+    const picked = notHwp.filter((f) => mode === "images+pdf" || !isPdf(f));
+    if (picked.length < notHwp.length) setError("PDF는 올릴 수 없습니다. 사진만 골라주세요.");
 
     // 주보 PDF는 저장용으로 그대로 올리고, 쪽마다 사진으로도 바꿔 올려 넘겨 보기에 쓴다.
     const accepted: File[] = [];
@@ -131,7 +144,9 @@ export default function AttachmentUpload({
       if (!isPdf(file)) continue;
       setSplitting(true);
       try {
-        accepted.push(...(await pdfToPageImages(file)));
+        const pages = await pdfToPageImages(file);
+        pages.forEach((p) => pdfPages.current.add(p));
+        accepted.push(...pages);
       } catch (err) {
         console.error(err);
         setError("PDF 쪽을 사진으로 바꾸지 못해 PDF만 올립니다. 넘겨 보기를 쓰려면 주보 사진을 따로 올려 주세요.");
@@ -178,7 +193,7 @@ export default function AttachmentUpload({
         id="attachments-input"
         type="file"
         multiple
-        accept={mode === "images" ? "image/*" : "image/*,application/pdf,.pdf"}
+        accept={mode === "images" ? "image/*" : "image/*,application/pdf,.pdf,.hwp,.hwpx"}
         onChange={handleChange}
         className="block w-full text-sm text-sub file:mr-4 file:px-4 file:py-2.5 file:rounded-lg file:border-0 file:bg-mist file:text-forest hover:file:bg-line"
       />
