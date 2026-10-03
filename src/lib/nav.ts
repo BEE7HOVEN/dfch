@@ -36,3 +36,16 @@ export const navGroups: NavGroup[] = [
     ],
   },
 ];
+
+// 주소로 상위 메뉴·하위 메뉴를 찾는다 (페이지 머리의 경로 표시용). 본문 주소(/letters/123)는 목록 메뉴로 찾는다.
+export function findNavTrail(
+  path: string,
+): { group: NavGroup; item: NavLink } | null {
+  for (const group of navGroups) {
+    const item = group.children.find(
+      (c) => path === c.href || path.startsWith(`${c.href}/`),
+    );
+    if (item) return { group, item };
+  }
+  return null;
+}

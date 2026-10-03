@@ -1,13 +1,6 @@
 import type { Metadata } from "next";
-import { Quicksand } from "next/font/google";
 import "./globals.css";
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from "@/lib/site";
-
-const quicksand = Quicksand({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-quicksand",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -27,13 +20,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={`${quicksand.variable} h-full antialiased scroll-smooth`}>
-      <body
-        className="min-h-full flex flex-col"
-        style={{ fontFamily: "var(--font-quicksand), 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" }}
-      >
-        {children}
-      </body>
+    <html lang="ko" className="h-full antialiased scroll-smooth">
+      <head>
+        {/* Pretendard: 글자 범위별로 필요한 부분만 내려받는 한글 웹 글꼴 */}
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
+      </head>
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

@@ -1,18 +1,50 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #404040;
+/* 디자인 기본 규칙: 색·글꼴은 여기 이름으로만 쓴다 (예: bg-forest, text-ink, border-line). */
+@theme {
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+
+  --color-forest: #24402f; /* 포인트 색 (깊은 숲 초록) */
+  --color-forest-deep: #1a3023;
+  --color-forest-soft: #3d5e4a;
+  --color-mist: #eef3ef; /* 옅은 초록 바탕 */
+  --color-paper: #f6f7f6; /* 칸 구분용 옅은 회색 바탕 */
+  --color-ink: #1f2421; /* 진한 글 */
+  --color-sub: #5b625d; /* 보조 글 */
+  --color-mute: #8a918c; /* 흐린 글 */
+  --color-line: #e4e8e5; /* 테두리 */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+:root {
+  --background: #ffffff;
+  --foreground: var(--color-ink);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  font-family: var(--font-sans);
+  word-break: keep-all; /* 한글 단어 중간에서 줄이 끊기지 않게 */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 콘텐츠 폭: 화면 폭에서 양옆 여백을 뺀 폭, 최대 1440px (우리들교회와 같은 규칙) */
+@utility shell {
+  width: min(1440px, calc(100% - 80px));
+  margin-inline: auto;
+  @media (max-width: 1200px) {
+    width: calc(100% - 48px);
+  }
+  @media (max-width: 767px) {
+    width: calc(100% - 36px);
+  }
+}
+
+/* 긴 글을 읽기 좋은 폭 */
+@utility reading {
+  max-width: 760px;
+  margin-inline: auto;
 }
 
 @keyframes fadeIn {

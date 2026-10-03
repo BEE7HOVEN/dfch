@@ -3,3 +3,6 @@
 export const SITE_URL = process.env.SITE_URL ?? "https://dfch.vercel.app";
 export const SITE_NAME = "드림숲교회";
 export const DEFAULT_OG_IMAGE = "/images/main-intro.png";
+export const YOUTUBE_URL = "https://www.youtube.com/@군포드림숲교회";
+export const CHURCH_ADDRESS = "경기도 군포시 삼성로69번길 13";
+export const CHURCH_PHONE = "010-3360-6818";
