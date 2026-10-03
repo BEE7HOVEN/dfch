@@ -1,11 +1,11 @@
 "use client";
 
-import { deleteLetterAction } from "@/app/admin/actions";
+import { deletePostAction } from "@/app/admin/actions";
 
 export default function DeleteButton({ id }: { id: string }) {
   return (
     <form
-      action={deleteLetterAction}
+      action={deletePostAction}
       onSubmit={(e) => {
         if (!confirm("이 글을 삭제할까요? 되돌릴 수 없습니다.")) {
           e.preventDefault();

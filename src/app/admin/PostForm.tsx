@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { FormState } from "@/app/admin/actions";
 import type { Post } from "@/lib/posts";
+import type { Board } from "@/lib/boards";
+import AudioUpload from "./AudioUpload";
 
 interface PostFormProps {
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
+  board: Board;
   post?: Post;
   defaultDate: string; // YYYY-MM-DD
   submitLabel: string;
@@ -16,15 +19,19 @@ const initialState: FormState = {};
 
 export default function PostForm({
   action,
+  board,
   post,
   defaultDate,
   submitLabel,
 }: PostFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
+  const [uploading, setUploading] = useState(false);
 
   return (
     <form action={formAction} className="space-y-6">
       {post && <input type="hidden" name="id" value={post.id} />}
+
+      <input type="hidden" name="category" value={board.category} />
 
       <div>
         <label htmlFor="post_date" className="block text-sm text-[#404040] mb-2">
@@ -42,28 +49,33 @@ export default function PostForm({
 
       <div>
         <label htmlFor="title" className="block text-sm text-[#404040] mb-2">
-          제목
+          {board.titleLabel}
         </label>
         <input
           id="title"
           name="title"
           type="text"
           defaultValue={post?.title ?? ""}
+          placeholder={board.titlePlaceholder}
           required
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#404040]/30"
         />
       </div>
 
+      {board.hasAudio && (
+        <AudioUpload initialKey={post?.audio_key} onBusyChange={setUploading} />
+      )}
+
       <div>
         <label htmlFor="content" className="block text-sm text-[#404040] mb-2">
-          내용
+          {board.contentRequired ? "내용" : "메모 (선택)"}
         </label>
         <textarea
           id="content"
           name="content"
-          rows={16}
+          rows={board.contentRequired ? 16 : 5}
           defaultValue={post?.content ?? ""}
-          required
+          required={board.contentRequired}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#404040]/30 leading-relaxed resize-y"
         />
         <p className="mt-2 text-xs text-[#999]">
@@ -76,10 +88,10 @@ export default function PostForm({
       <div className="flex items-center gap-3">
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || uploading}
           className="px-6 py-3 bg-[#2c2c2c] text-white rounded-lg hover:bg-[#404040] transition-colors disabled:opacity-50"
         >
-          {pending ? "저장 중..." : submitLabel}
+          {pending ? "저장 중..." : uploading ? "업로드 중..." : submitLabel}
         </button>
         <Link
           href="/admin"

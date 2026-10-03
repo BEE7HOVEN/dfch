@@ -1,6 +1,6 @@
 import { getSql } from "@/lib/db";
 
-export type PostCategory = "letter" | "news";
+export type PostCategory = "letter" | "meditation" | "news";
 
 export interface Post {
   id: string;
@@ -8,6 +8,7 @@ export interface Post {
   title: string;
   content: string;
   post_date: string; // YYYY-MM-DD (관리자가 지정하는 글 날짜)
+  audio_key: string | null; // R2에 저장된 녹음 파일 위치 (매일의 묵상)
   created_at: string;
   updated_at: string;
 }
@@ -16,15 +17,17 @@ const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // 날짜/타임스탬프는 ::text로 캐스팅해 "YYYY-MM-DD" 문자열로 받는다(타임존 오류 방지).
-export async function getLetters(): Promise<Post[]> {
+export async function getPostsByCategory(
+  category: PostCategory,
+): Promise<Post[]> {
   const sql = getSql();
   const rows = await sql`
-    SELECT id, category, title, content,
+    SELECT id, category, title, content, audio_key,
            post_date::text AS post_date,
            created_at::text AS created_at,
            updated_at::text AS updated_at
     FROM posts
-    WHERE category = 'letter'
+    WHERE category = ${category}
     ORDER BY post_date DESC, created_at DESC`;
   return rows as Post[];
 }
@@ -32,7 +35,7 @@ export async function getLetters(): Promise<Post[]> {
 export async function getAllPosts(): Promise<Post[]> {
   const sql = getSql();
   const rows = await sql`
-    SELECT id, category, title, content,
+    SELECT id, category, title, content, audio_key,
            post_date::text AS post_date,
            created_at::text AS created_at,
            updated_at::text AS updated_at
@@ -45,7 +48,7 @@ export async function getPost(id: string): Promise<Post | null> {
   if (!UUID_RE.test(id)) return null;
   const sql = getSql();
   const rows = await sql`
-    SELECT id, category, title, content,
+    SELECT id, category, title, content, audio_key,
            post_date::text AS post_date,
            created_at::text AS created_at,
            updated_at::text AS updated_at
@@ -59,16 +62,22 @@ export async function createPost(input: {
   title: string;
   content: string;
   post_date: string;
+  audio_key: string | null;
 }): Promise<void> {
   const sql = getSql();
   await sql`
-    INSERT INTO posts (category, title, content, post_date)
-    VALUES (${input.category}, ${input.title}, ${input.content}, ${input.post_date})`;
+    INSERT INTO posts (category, title, content, post_date, audio_key)
+    VALUES (${input.category}, ${input.title}, ${input.content}, ${input.post_date}, ${input.audio_key})`;
 }
 
 export async function updatePost(
   id: string,
-  input: { title: string; content: string; post_date: string },
+  input: {
+    title: string;
+    content: string;
+    post_date: string;
+    audio_key: string | null;
+  },
 ): Promise<void> {
   const sql = getSql();
   await sql`
@@ -76,6 +85,7 @@ export async function updatePost(
     SET title = ${input.title},
         content = ${input.content},
         post_date = ${input.post_date},
+        audio_key = ${input.audio_key},
         updated_at = now()
     WHERE id = ${id}`;
 }

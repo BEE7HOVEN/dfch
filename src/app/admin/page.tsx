@@ -5,6 +5,7 @@ import Hero from "@/components/Hero";
 import { requireAuth } from "@/lib/auth";
 import { getAllPosts } from "@/lib/posts";
 import { formatPostDate } from "@/lib/format";
+import { boards, isBoardCategory } from "@/lib/boards";
 import { logoutAction } from "./actions";
 import DeleteButton from "./DeleteButton";
 
@@ -18,7 +19,7 @@ export default async function AdminPage() {
     <>
       <Header />
       <main className="pt-16 min-h-[60vh]">
-        <Hero image="/images/hero-5.jpg" title="목회편지" />
+        <Hero image="/images/hero-5.jpg" title="글 관리" />
         <section className="max-w-3xl mx-auto px-4 py-12 md:py-16">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-xl font-light text-[#2c2c2c]">글 관리</h2>
@@ -32,13 +33,16 @@ export default async function AdminPage() {
             </form>
           </div>
 
-          <div className="mb-6">
-            <Link
-              href="/admin/new"
-              className="inline-block px-5 py-3 bg-[#2c2c2c] text-white rounded-lg hover:bg-[#404040] transition-colors"
-            >
-              + 새 목회편지 쓰기
-            </Link>
+          <div className="mb-6 flex flex-wrap gap-3">
+            {Object.values(boards).map((board) => (
+              <Link
+                key={board.category}
+                href={`/admin/new?board=${board.category}`}
+                className="inline-block px-5 py-3 bg-[#2c2c2c] text-white rounded-lg hover:bg-[#404040] transition-colors"
+              >
+                + {board.newLabel}
+              </Link>
+            ))}
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-100">
@@ -55,6 +59,8 @@ export default async function AdminPage() {
                   <div className="min-w-0">
                     <p className="text-[#2c2c2c] truncate">{post.title}</p>
                     <p className="text-xs text-[#999] mt-1">
+                      {isBoardCategory(post.category) &&
+                        `${boards[post.category].label} · `}
                       {formatPostDate(post.post_date)}
                     </p>
                   </div>

@@ -5,7 +5,8 @@ import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import { requireAuth } from "@/lib/auth";
 import { getPost } from "@/lib/posts";
-import { updateLetterAction } from "../../actions";
+import { boards, isBoardCategory } from "@/lib/boards";
+import { updatePostAction } from "../../actions";
 import PostForm from "../../PostForm";
 import DeleteButton from "../../DeleteButton";
 
@@ -19,26 +20,28 @@ export default async function EditPostPage({
   await requireAuth();
   const { id } = await params;
   const post = await getPost(id);
-  if (!post) notFound();
+  if (!post || !isBoardCategory(post.category)) notFound();
+  const board = boards[post.category];
 
   return (
     <>
       <Header />
       <main className="pt-16 min-h-[60vh]">
-        <Hero image="/images/hero-5.jpg" title="목회편지" />
+        <Hero image="/images/hero-5.jpg" title="글 관리" />
         <section className="max-w-2xl mx-auto px-4 py-12 md:py-16">
           <div className="mb-8">
             <Link
-              href="/letters"
+              href="/admin"
               className="text-sm text-[#999] hover:text-[#2c2c2c] transition-colors"
             >
-              ← 목회편지
+              ← 글 관리
             </Link>
             <h1 className="text-2xl font-light text-[#2c2c2c] mt-2">글 수정</h1>
           </div>
 
           <PostForm
-            action={updateLetterAction}
+            action={updatePostAction}
+            board={board}
             post={post}
             defaultDate={post.post_date}
             submitLabel="수정 저장"

@@ -16,7 +16,7 @@ export default async function LoginPage() {
     <>
       <Header />
       <main className="pt-16">
-        <Hero image="/images/hero-5.jpg" title="목회편지" />
+        <Hero image="/images/hero-5.jpg" title="글 관리" />
         <section className="px-4 py-16 flex justify-center">
           <div className="w-full max-w-sm">
             <h2 className="text-center text-lg font-light text-[#2c2c2c] mb-6">
