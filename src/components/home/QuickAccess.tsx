@@ -32,7 +32,7 @@ export default function QuickAccess() {
       <div className="shell">
         <SectionHead
           eyebrow="바로가기"
-          title="어서 오세요, 드림숲입니다"
+          title="어서 오세요, 드림숲교회입니다"
           description="처음 오신 분을 위한 안내와 자주 찾는 메뉴를 모았습니다."
         />
 
