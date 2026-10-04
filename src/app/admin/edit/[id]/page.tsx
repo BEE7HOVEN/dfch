@@ -36,10 +36,10 @@ export default async function EditPostPage({
           <div className="max-w-[860px]">
           <div className="mb-8">
             <Link
-              href="/admin"
+              href={`/admin?board=${board.category}`}
               className="text-sm text-mute hover:text-forest transition-colors"
             >
-              ← 글 관리
+              ← {board.label} 관리
             </Link>
             <h1 className="text-2xl font-bold text-ink mt-2">글 수정</h1>
           </div>

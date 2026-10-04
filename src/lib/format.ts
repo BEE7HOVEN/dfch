@@ -5,6 +5,13 @@ export function formatPostDate(ymd: string): string {
   return ymd.slice(0, 10).split("-").join(".");
 }
 
+// YYYY-MM-DD에 날짜 수를 더한다 (배너 내리기 = 어제로 끝내기).
+export function addDays(ymd: string, days: number): string {
+  const d = new Date(`${ymd}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
 // 한국 시간 기준 오늘 날짜를 YYYY-MM-DD로 반환 (서버 타임존과 무관).
 export function seoulToday(): string {
   return new Intl.DateTimeFormat("en-CA", {

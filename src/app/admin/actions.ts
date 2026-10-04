@@ -15,10 +15,11 @@ import {
   getAttachments,
   getPost,
   removeAttachments,
+  setBannerEndsOn,
   updatePost,
   type NewAttachment,
 } from "@/lib/posts";
-import { seoulToday } from "@/lib/format";
+import { addDays, seoulToday } from "@/lib/format";
 import { boards, isBoardCategory, type Board } from "@/lib/boards";
 import { createUploadUrl, deleteObject, deleteObjectsQuietly } from "@/lib/r2";
 
@@ -317,7 +318,7 @@ export async function createPostAction(
   revalidatePath(board.path);
   revalidatePath("/"); // 메인의 최근 공지·묵상
   revalidatePath("/admin");
-  redirect("/admin");
+  redirect(`/admin?board=${category}`);
 }
 
 export async function updatePostAction(
@@ -373,7 +374,7 @@ export async function updatePostAction(
   revalidatePath(`${board.path}/${id}`);
   revalidatePath("/"); // 메인의 최근 공지·묵상
   revalidatePath("/admin");
-  redirect("/admin");
+  redirect(`/admin?board=${board.category}`);
 }
 
 export async function deletePostAction(formData: FormData): Promise<void> {
@@ -392,5 +393,16 @@ export async function deletePostAction(formData: FormData): Promise<void> {
     revalidatePath("/"); // 메인의 최근 공지·묵상
     revalidatePath("/admin");
   }
-  redirect("/admin");
+  redirect(existing && isBoardCategory(existing.category) ? `/admin?board=${existing.category}` : "/admin");
+}
+
+// 배너 내리기(종료일을 어제로) · 다시 걸기(종료일 없앰). 지운 것이 아니라 언제든 다시 걸 수 있다.
+export async function toggleBannerAction(formData: FormData): Promise<void> {
+  if (!(await isAuthenticated())) redirect("/admin/login");
+  const id = String(formData.get("id") ?? "");
+  const on = formData.get("mode") === "on";
+  await setBannerEndsOn(id, on ? null : addDays(seoulToday(), -1));
+  revalidatePath("/");
+  revalidatePath("/admin");
+  redirect("/admin?board=banner");
 }

@@ -127,6 +127,15 @@ export async function getAdjacentPosts(
   };
 }
 
+// 배너 내리기·다시 걸기: 게시 종료일만 바꾼다 (null = 종료일 없음).
+export async function setBannerEndsOn(id: string, endsOn: string | null): Promise<void> {
+  if (!UUID_RE.test(id)) return;
+  const sql = getSql();
+  await sql`
+    UPDATE posts SET ends_on = ${endsOn}::date, updated_at = now()
+    WHERE id = ${id} AND category = 'banner'`;
+}
+
 export async function createPost(input: {
   category: PostCategory;
   title: string;
