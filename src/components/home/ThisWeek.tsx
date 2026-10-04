@@ -1,6 +1,7 @@
-// 메인 이번 주: 금주의 주보 카드(첫 쪽 미리보기) + 최근 공지사항 + 최근 매일의 묵상
+// 메인 이번 주: 넓은 금주의 주보 카드(첫 쪽 전체) + 최근 공지사항. 매일의 묵상은 말씀과 예배 칸(RecentMeditations)으로 옮김.
 import Link from "next/link";
 import SectionHead from "@/components/SectionHead";
+import ShareButton from "@/components/ShareButton";
 import { boards, type Board } from "@/lib/boards";
 import { getAlbumCovers, getRecentPosts, type Attachment, type Post } from "@/lib/posts";
 import { formatPostDate } from "@/lib/format";
@@ -15,11 +16,12 @@ async function safe<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
   }
 }
 
-async function loadLatestBulletin(): Promise<{ post: Post; cover?: Attachment } | null> {
+async function loadLatestBulletin(): Promise<{ post: Post; cover?: Attachment; pages: number } | null> {
   const [post] = await getRecentPosts("bulletin", 1);
   if (!post) return null;
   const covers = await getAlbumCovers([post.id]);
-  return { post, cover: covers.get(post.id)?.cover };
+  const c = covers.get(post.id);
+  return { post, cover: c?.cover, pages: c?.count ?? 0 };
 }
 
 // 카드 높이(약 620px)에 맞춰 공지·묵상을 몇 개까지 보여 줄지
@@ -66,58 +68,67 @@ function PostList({ board, posts, empty }: { board: Board; posts: Post[]; empty:
 }
 
 export default async function ThisWeek() {
-  const [bulletin, notices, meditations] = await Promise.all([
+  const [bulletin, notices] = await Promise.all([
     safe(loadLatestBulletin, null),
     safe(() => getRecentPosts("notice", LIST_SIZE), [] as Post[]),
-    safe(() => getRecentPosts("meditation", LIST_SIZE), [] as Post[]),
   ]);
+  const ratio =
+    bulletin?.cover?.width && bulletin.cover.height ? bulletin.cover.width / bulletin.cover.height : Math.SQRT2;
+  const bulletinHref = bulletin ? `${boards.bulletin.path}/${bulletin.post.id}` : boards.bulletin.path;
 
   return (
     <section className="py-16 md:py-24 bg-paper">
       <div className="shell">
-        <SectionHead
-          eyebrow="이번 주"
-          title="이번 주 드림숲 소식"
-          description="주보와 공지, 날마다 올라오는 묵상을 모았습니다."
-        />
+        <SectionHead eyebrow="이번 주" title="이번 주 드림숲 소식" description="이번 주 주보와 교회 공지를 모았습니다." />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-          <div className="rounded-[24px] bg-white border border-line p-6 md:p-8 flex flex-col lg:min-h-[620px]">
+          {/* 주보는 가로 A4가 많아 두 칸 너비로 넓게, 첫 쪽 전체를 보여 준다. */}
+          <div className="lg:col-span-2 rounded-[24px] bg-white border border-line p-6 md:p-8 flex flex-col lg:min-h-[620px]">
             <CardHead title="금주의 주보" href={boards.bulletin.path} />
             {bulletin ? (
-              <Link
-                href={`${boards.bulletin.path}/${bulletin.post.id}`}
-                className="group mt-6 flex flex-col items-center text-center flex-1"
-              >
-                <div className="w-[68%] max-w-[300px] aspect-[3/4] shadow-[0_12px_32px_rgba(31,36,33,0.10)] overflow-hidden rounded-xl border border-line bg-paper flex items-center justify-center">
-                  {bulletin.cover?.thumb_key ? (
+              <div className="mt-6 flex-1 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_200px] gap-6 xl:gap-8 items-center">
+                <Link
+                  href={bulletinHref}
+                  aria-label={`${bulletin.post.title} 넘겨 보기`}
+                  className={`group relative block w-full aspect-(--page-ratio) xl:aspect-auto xl:h-[440px] rounded-xl ${bulletin.cover?.file_key ? "" : "bg-paper"}`}
+                  style={{ "--page-ratio": String(ratio) } as React.CSSProperties}
+                >
+                  {bulletin.cover?.file_key ? (
                     // 캐시되는 메인이라 서명 주소 대신 고정 주소(/r2/…)를 쓴다.
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={`/r2/${bulletin.cover.thumb_key}`}
+                      src={`/r2/${bulletin.cover.file_key}`}
                       alt=""
-                      className={`w-full h-full object-cover ${(bulletin.cover.width ?? 0) > (bulletin.cover.height ?? 0) ? "object-right-top" : "object-top"} group-hover:scale-[1.03] transition-transform duration-500`}
+                      className="absolute inset-0 w-full h-full object-contain drop-shadow-[0_10px_24px_rgba(31,36,33,0.16)] group-hover:scale-[1.01] transition-transform duration-500"
                     />
                   ) : (
-                    <span className="text-sm font-semibold text-red-600">PDF</span>
+                    <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-red-600">PDF</span>
                   )}
+                </Link>
+                <div>
+                  <p className="text-sm font-semibold text-forest">이번 주 주보</p>
+                  <p className="mt-2 text-xl font-bold leading-snug text-ink">{bulletin.post.title}</p>
+                  <p className="mt-2 text-sm text-mute">
+                    {formatPostDate(bulletin.post.post_date)}
+                    {bulletin.pages > 0 && ` · ${bulletin.pages}쪽`}
+                  </p>
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    <Link
+                      href={bulletinHref}
+                      className="inline-flex items-center rounded-full bg-forest px-5 py-2.5 text-sm font-semibold text-white hover:bg-forest-deep transition-colors"
+                    >
+                      주보 넘겨 보기 →
+                    </Link>
+                    <ShareButton title={bulletin.post.title} path={bulletinHref} pill />
+                  </div>
                 </div>
-                <div className="mt-auto pt-6">
-                  <p className="text-lg font-bold leading-snug text-ink">{bulletin.post.title}</p>
-                  <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-sm text-sub group-hover:border-forest group-hover:text-forest transition-colors">
-                    주보 보기 ↗
-                  </span>
-                </div>
-              </Link>
+              </div>
             ) : (
-              <p className="flex-1 flex items-center justify-center py-10 text-sm text-mute">
-                아직 등록된 주보가 없습니다.
-              </p>
+              <p className="flex-1 flex items-center justify-center py-10 text-sm text-mute">아직 등록된 주보가 없습니다.</p>
             )}
           </div>
 
           <PostList board={boards.notice} posts={notices} empty="아직 등록된 공지가 없습니다." />
-          <PostList board={boards.meditation} posts={meditations} empty="아직 등록된 묵상이 없습니다." />
         </div>
       </div>
     </section>
