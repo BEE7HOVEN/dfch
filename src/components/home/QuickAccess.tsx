@@ -63,7 +63,7 @@ export default function QuickAccess() {
               {MENUS.map((m) => {
                 const className = `group h-full flex flex-col justify-between gap-6 rounded-[20px] border p-5 md:p-6 transition-colors ${
                   m.strong
-                    ? "bg-forest border-forest text-white hover:bg-forest-soft hover:border-forest-soft"
+                    ? "bg-mist border-mist text-ink hover:border-forest/30"
                     : "bg-white border-line text-ink hover:bg-mist hover:border-forest/30"
                 }`;
                 const body = (
@@ -73,7 +73,7 @@ export default function QuickAccess() {
                     </span>
                     <span>
                       <span className="block text-base md:text-lg font-bold">{m.title}</span>
-                      <span className={`mt-1 block text-[13px] ${m.strong ? "text-white/70" : "text-mute"}`}>{m.desc}</span>
+                      <span className={`mt-1 block text-[13px] ${m.strong ? "text-sub" : "text-mute"}`}>{m.desc}</span>
                     </span>
                   </>
                 );
