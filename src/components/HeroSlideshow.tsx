@@ -1,5 +1,6 @@
 "use client";
-// 교회 건물 사진 슬라이드. 화면 폭 전체로 넘어가며, children을 주면 사진 위에 얹어 보여 준다(메인 교회 소개 칸).
+// 교회 건물 사진 슬라이드. 화면 폭 전체로 넘어가며, children을 주면 사진 위에 얹어 보여 준다(메인 맨 위 교회 소개 칸).
+// 사진 9장(약 5.5MB)을 한꺼번에 받지 않도록 지금 장과 다음 장만 먼저 받고, 넘어갈 때마다 한 장씩 더 받는다.
 
 import { useState, useEffect, useCallback } from "react";
 
@@ -23,13 +24,17 @@ export default function HeroSlideshow({
   children?: React.ReactNode;
 }) {
   const [current, setCurrent] = useState(0);
+  // 이 순번까지의 사진만 배경으로 건다 (지금 장 + 다음 장).
+  const [reached, setReached] = useState(1);
 
   const next = useCallback(() => {
     setCurrent((prev) => (prev + 1) % slides.length);
+    setReached((r) => Math.min(slides.length - 1, r + 1));
   }, []);
 
   const prev = useCallback(() => {
     setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
+    setReached(slides.length - 1); // 뒤로 가면 마지막 장으로 가므로 모두 받는다
   }, []);
 
   useEffect(() => {
@@ -45,7 +50,7 @@ export default function HeroSlideshow({
           className={`absolute inset-0 bg-cover bg-center transition-opacity duration-[1200ms] ease-in-out ${
             i === current ? "opacity-100" : "opacity-0"
           }`}
-          style={{ backgroundImage: `url(${src})` }}
+          style={i <= reached ? { backgroundImage: `url(${src})` } : undefined}
         />
       ))}
 
@@ -87,7 +92,10 @@ export default function HeroSlideshow({
         {slides.map((_, i) => (
           <button
             key={i}
-            onClick={() => setCurrent(i)}
+            onClick={() => {
+              setCurrent(i);
+              setReached((r) => Math.max(r, Math.min(slides.length - 1, i + 1)));
+            }}
             className={`w-2 h-2 rounded-full transition-colors ${
               i === current ? "bg-white" : "bg-white/40"
             }`}
