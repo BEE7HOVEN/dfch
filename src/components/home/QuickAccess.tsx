@@ -58,37 +58,39 @@ export default function QuickAccess() {
             </ul>
           </div>
 
-          {/* 6개를 모두 같은 크기·같은 색 카드로 놓아 바둑판이 반듯하게 */}
-          <ul className="grid grid-cols-2 md:grid-cols-3 auto-rows-fr gap-3 md:gap-4">
-              {MENUS.map((m) => {
-                const className =
-                  "group h-full flex flex-col justify-between gap-6 rounded-[20px] border border-transparent bg-sage p-5 md:p-6 text-ink transition-colors hover:border-forest/30";
-                const body = (
-                  <>
-                    <span className="self-end opacity-60 group-hover:opacity-100">
-                      <Arrow />
-                    </span>
-                    <span>
-                      <span className="block text-base md:text-lg font-bold">{m.title}</span>
-                      <span className="mt-1 block text-[13px] text-sub">{m.desc}</span>
-                    </span>
-                  </>
-                );
-                return (
-                  <li key={m.title}>
-                    {m.external ? (
-                      <a href={m.href} target="_blank" rel="noopener noreferrer" className={className}>
-                        {body}
-                      </a>
-                    ) : (
-                      <Link href={m.href} className={className}>
-                        {body}
-                      </Link>
-                    )}
-                  </li>
-                );
-              })}
-          </ul>
+          {/* 왼쪽 "처음 오셨나요?"와 같은 규칙: 연한 초록 판 안에 같은 크기의 흰 카드 6개 */}
+          <div className="rounded-[24px] bg-mist p-4 md:p-7">
+            <ul className="h-full grid grid-cols-2 md:grid-cols-3 auto-rows-fr gap-3 md:gap-4">
+                {MENUS.map((m) => {
+                  const className =
+                    "group h-full flex flex-col justify-between gap-6 rounded-[20px] border border-transparent bg-white p-5 md:p-6 text-ink transition-colors hover:border-forest/30";
+                  const body = (
+                    <>
+                      <span className="self-end opacity-60 group-hover:opacity-100">
+                        <Arrow />
+                      </span>
+                      <span>
+                        <span className="block text-base md:text-lg font-bold">{m.title}</span>
+                        <span className="mt-1 block text-[13px] text-sub">{m.desc}</span>
+                      </span>
+                    </>
+                  );
+                  return (
+                    <li key={m.title}>
+                      {m.external ? (
+                        <a href={m.href} target="_blank" rel="noopener noreferrer" className={className}>
+                          {body}
+                        </a>
+                      ) : (
+                        <Link href={m.href} className={className}>
+                          {body}
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
+            </ul>
+          </div>
         </div>
       </div>
     </section>
