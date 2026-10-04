@@ -10,9 +10,9 @@ const FIRST_VISIT = [
 ];
 
 const MENUS = [
-  { title: "설교말씀", desc: "주일·수요 설교와 예배 영상", href: "/media", strong: true },
-  { title: "매일의 묵상", desc: "날마다 올라오는 묵상 녹음", href: "/meditation", strong: true },
-  { title: "유튜브 채널", desc: "드림숲교회 영상 모음", href: YOUTUBE_URL, external: true, strong: true },
+  { title: "설교말씀", desc: "주일·수요 설교와 예배 영상", href: "/media" },
+  { title: "매일의 묵상", desc: "날마다 올라오는 묵상 녹음", href: "/meditation" },
+  { title: "유튜브 채널", desc: "드림숲교회 영상 모음", href: YOUTUBE_URL, external: true },
   { title: "주보", desc: "이번 주 주보 보기", href: "/news/bulletin" },
   { title: "갤러리", desc: "예배와 행사 사진", href: "/news/gallery" },
   { title: "목회편지", desc: "담임목사님의 편지", href: "/letters" },
@@ -58,14 +58,11 @@ export default function QuickAccess() {
             </ul>
           </div>
 
-          {/* 6개를 모두 같은 크기의 카드로 놓아 바둑판이 반듯하게 (중요한 2개만 초록) */}
+          {/* 6개를 모두 같은 크기·같은 색 카드로 놓아 바둑판이 반듯하게 */}
           <ul className="grid grid-cols-2 md:grid-cols-3 auto-rows-fr gap-3 md:gap-4">
               {MENUS.map((m) => {
-                const className = `group h-full flex flex-col justify-between gap-6 rounded-[20px] border p-5 md:p-6 transition-colors ${
-                  m.strong
-                    ? "bg-mist border-mist text-ink hover:border-forest/30"
-                    : "bg-white border-line text-ink hover:bg-mist hover:border-forest/30"
-                }`;
+                const className =
+                  "group h-full flex flex-col justify-between gap-6 rounded-[20px] border border-transparent bg-sage p-5 md:p-6 text-ink transition-colors hover:border-forest/30";
                 const body = (
                   <>
                     <span className="self-end opacity-60 group-hover:opacity-100">
@@ -73,7 +70,7 @@ export default function QuickAccess() {
                     </span>
                     <span>
                       <span className="block text-base md:text-lg font-bold">{m.title}</span>
-                      <span className={`mt-1 block text-[13px] ${m.strong ? "text-sub" : "text-mute"}`}>{m.desc}</span>
+                      <span className="mt-1 block text-[13px] text-sub">{m.desc}</span>
                     </span>
                   </>
                 );
