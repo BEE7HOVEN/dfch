@@ -1,4 +1,4 @@
-// 메인 교회 소개: 큰 건물 사진 슬라이드 위에 교회 소개 요약과 교회 소개/오시는 길 버튼 (예배 시간은 바로 아래 바닥글에 있어 넣지 않는다)
+// 메인 맨 위 교회 소개: 큰 건물 사진 슬라이드 위에 교회 소개 요약과 교회 소개/오시는 길 버튼 (예배 시간은 바닥글에 있어 넣지 않는다)
 import Link from "next/link";
 import HeroSlideshow from "@/components/HeroSlideshow";
 

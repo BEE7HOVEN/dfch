@@ -16,6 +16,8 @@ export default function Home() {
     <>
       <Header />
       <main>
+        {/* 첫 화면: 큰 교회 사진 위 교회 소개 */}
+        <AboutChurch />
         <HomeHero />
         <QuickAccess />
         <ThisWeek />
@@ -23,7 +25,6 @@ export default function Home() {
           <RecentMeditations />
         </WordWorship>
         <RecentAlbums />
-        <AboutChurch />
       </main>
       <Footer />
     </>

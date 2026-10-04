@@ -24,7 +24,7 @@ export default async function HomeHero() {
   const banners = await loadBanners();
 
   return (
-    <section className="pt-5 md:pt-8">
+    <section className="pt-8 md:pt-12">
       <div className="shell grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_clamp(320px,30vw,420px)] gap-4 lg:gap-6 lg:h-[480px]">
         <div className="aspect-[19/10] lg:aspect-auto lg:h-full">
           <BannerSlider items={banners} />
