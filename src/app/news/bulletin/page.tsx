@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import { AdminPencil } from "@/components/BoardList";
+import ShareButton from "@/components/ShareButton";
 import { boards } from "@/lib/boards";
 import { getAlbumCovers, getPostsByCategory } from "@/lib/posts";
 import { formatPostDate } from "@/lib/format";
@@ -70,24 +71,34 @@ export default async function BulletinPage() {
             <p className="py-24 text-center text-mute">아직 등록된 주보가 없습니다.</p>
           ) : (
             <>
-              <Link
-                href={`${board.path}/${latest.id}`}
-                className="group mt-10 grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-8 md:gap-14 items-center rounded-[24px] bg-mist p-6 md:p-12"
-              >
-                <Cover
-                  url={coverUrls.get(latest.id)}
-                  landscape={isLandscape(latest.id)}
-                  className="w-full max-w-[360px] mx-auto aspect-[3/4] rounded-xl shadow-[0_16px_40px_rgba(31,36,33,0.14)]"
-                />
+              {/* 카드 안에 공유 단추를 두려고 카드 전체가 아니라 표지·제목·넘겨 보기를 각각 링크로 둔다. */}
+              <div className="mt-10 grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-8 md:gap-14 items-center rounded-[24px] bg-mist p-6 md:p-12">
+                <Link href={`${board.path}/${latest.id}`} className="group block w-full max-w-[360px] mx-auto" aria-label={`${latest.title} 넘겨 보기`}>
+                  <Cover
+                    url={coverUrls.get(latest.id)}
+                    landscape={isLandscape(latest.id)}
+                    className="w-full aspect-[3/4] rounded-xl shadow-[0_16px_40px_rgba(31,36,33,0.14)]"
+                  />
+                </Link>
                 <div>
                   <p className="text-sm font-semibold text-forest">이번 주 주보</p>
-                  <h2 className="mt-3 text-[24px] md:text-[34px] font-bold leading-snug text-ink">{latest.title}</h2>
+                  <h2 className="mt-3 text-[24px] md:text-[34px] font-bold leading-snug text-ink">
+                    <Link href={`${board.path}/${latest.id}`} className="hover:text-forest">
+                      {latest.title}
+                    </Link>
+                  </h2>
                   <p className="mt-2 text-[15px] text-sub">{formatPostDate(latest.post_date)}</p>
-                  <span className="mt-8 inline-flex items-center gap-2 rounded-full bg-forest px-6 py-3 text-sm font-semibold text-white group-hover:bg-forest-deep transition-colors">
-                    주보 넘겨 보기 →
-                  </span>
+                  <div className="mt-8 flex flex-wrap items-center gap-3">
+                    <Link
+                      href={`${board.path}/${latest.id}`}
+                      className="inline-flex items-center gap-2 rounded-full bg-forest px-6 py-3 text-sm font-semibold text-white hover:bg-forest-deep transition-colors"
+                    >
+                      주보 넘겨 보기 →
+                    </Link>
+                    <ShareButton title={latest.title} path={`${board.path}/${latest.id}`} pill />
+                  </div>
                 </div>
-              </Link>
+              </div>
 
               {past.length > 0 && (
                 <>

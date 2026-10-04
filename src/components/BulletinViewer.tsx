@@ -1,7 +1,8 @@
 "use client";
-// 주보 넘겨 보기: 책장처럼 쪽을 넘기고(휴대폰은 손가락으로 밀어서), 확대·축소·전체화면·PDF 저장을 둔다. 사진 없이 PDF만 있으면 PDF를 그대로 띄운다.
+// 주보 넘겨 보기: 쪽을 넘기고(단추·쪽 양쪽 누르기·휴대폰 밀기·키보드), 확대·축소·전체화면·PDF 저장을 둔다. 사진 없이 PDF만 있으면 PDF를 그대로 띄운다.
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import ShareButton from "@/components/ShareButton";
 
 export interface BulletinPage {
   url: string;
@@ -12,8 +13,6 @@ export interface BulletinPage {
 
 const ZOOMS = [1, 1.5, 2, 3];
 const SWIPE_PX = 50;
-const FLIP_MS = 700;
-const FLIP_EASING = "cubic-bezier(0.45, 0.05, 0.3, 1)";
 
 function ToolButton({
   label,
@@ -76,53 +75,15 @@ export default function BulletinViewer({
   const touchX = useRef<number | null>(null);
   const swipedAt = useRef(0); // 밀어서 넘긴 시각 (바로 뒤따르는 누름으로 한 번 더 넘어가지 않게)
   const count = pages.length;
-  // 넘기는 중인 장 (from → to). 끝나면 index를 to로 바꾼다.
-  const [flip, setFlip] = useState<{ from: number; to: number } | null>(null);
-  const leafRef = useRef<HTMLDivElement>(null);
-  const shadeRef = useRef<HTMLDivElement>(null);
-  const backRef = useRef<HTMLDivElement>(null);
-  const reduceMotion = useRef(false);
 
   const go = useCallback(
     (next: number) => {
-      if (next < 0 || next >= count || next === index || flip) return;
+      if (next < 0 || next >= count) return;
+      setIndex(next);
       setZoom(0);
-      // 확대 중이거나 "동작 줄이기"를 켠 기기에서는 효과 없이 바로 바꾼다.
-      if (reduceMotion.current || zoom > 0) setIndex(next);
-      else setFlip({ from: index, to: next });
     },
-    [count, index, flip, zoom],
+    [count],
   );
-
-  useEffect(() => {
-    reduceMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }, []);
-
-  // 책장 넘김: 앞으로는 지금 장이 왼쪽 모서리를 축으로 넘어가 사라지고, 뒤로는 앞 장이 넘어와 덮는다.
-  useEffect(() => {
-    if (!flip || !leafRef.current) return;
-    const forward = flip.to > flip.from;
-    // 넘기는 장에는 회전만 건다. 투명도를 함께 걸면 브라우저가 입체를 평면으로 눌러 뒷면 대신 앞면이 비친다.
-    const turn = forward
-      ? [{ transform: "rotateY(0deg)" }, { transform: "rotateY(-180deg)" }]
-      : [{ transform: "rotateY(-180deg)" }, { transform: "rotateY(0deg)" }];
-    // 다 넘어간 종이 뒷면은 쪽 왼쪽에 남지 않게 끝무렵 흐려진다 (뒤로 넘길 때는 처음에 나타남).
-    const back = forward
-      ? [{ opacity: 1 }, { opacity: 1, offset: 0.7 }, { opacity: 0 }]
-      : [{ opacity: 0 }, { opacity: 1, offset: 0.3 }, { opacity: 1 }];
-    const shade = forward
-      ? [{ opacity: 0 }, { opacity: 1, offset: 0.5 }, { opacity: 0.6 }]
-      : [{ opacity: 0.6 }, { opacity: 1, offset: 0.5 }, { opacity: 0 }];
-    const opts = { duration: FLIP_MS, easing: FLIP_EASING, fill: "forwards" as const };
-    const anim = leafRef.current.animate(turn, opts);
-    shadeRef.current?.animate(shade, opts);
-    backRef.current?.animate(back, opts);
-    anim.onfinish = () => {
-      setIndex(flip.to);
-      setFlip(null);
-    };
-    return () => anim.cancel();
-  }, [flip]);
 
   // 키보드 ←·→ 로도 넘긴다 (입력칸에 있을 때는 제외).
   useEffect(() => {
@@ -222,10 +183,13 @@ export default function BulletinViewer({
               )}
             </ToolButton>
           )}
+          <span className="ml-1">
+            <ShareButton title={title} pill />
+          </span>
           {pdfDownloadUrl && (
             <a
               href={pdfDownloadUrl}
-              className="ml-1 inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-sm font-medium text-sub hover:border-forest hover:text-forest transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-sm font-medium text-sub hover:border-forest hover:text-forest transition-colors"
             >
               PDF 저장
             </a>
@@ -233,7 +197,7 @@ export default function BulletinViewer({
         </div>
       </div>
 
-      {/* 쪽 화면: 맞춤일 때는 책장처럼 넘기고, 확대하면 지금 쪽만 크게 띄워 스크롤한다. */}
+      {/* 쪽 화면: 맞춤일 때는 쪽 크기 상자에 꽉 맞추고, 확대하면 지금 쪽만 크게 띄워 스크롤한다. */}
       <div
         className={`relative ${fullscreen ? "flex-1 min-h-0" : "aspect-(--page-ratio) max-h-[80vh] md:aspect-auto md:h-[78vh] md:min-h-[460px] md:max-h-[1200px]"}`}
         style={{ "--page-ratio": String(ratio) } as React.CSSProperties}
@@ -264,35 +228,15 @@ export default function BulletinViewer({
             />
           </div>
         ) : (
-          <div className="absolute inset-0 overflow-hidden flex items-center justify-center p-2 md:p-6 [container-type:size] [perspective:2400px]">
-            {/* 쪽 크기 상자: 화면 안에 쪽 비율대로 꽉 맞춘다. 넘기는 장의 축(왼쪽 모서리)이 쪽 모서리와 맞아야 해서 상자를 쪽 크기로 둔다. */}
+          <div className="absolute inset-0 overflow-hidden flex items-center justify-center p-2 md:p-6 [container-type:size]">
+            {/* 쪽 크기 상자: 화면 안에 쪽 비율대로 꽉 맞춘다. */}
             <div
               className="relative bg-white shadow-[0_8px_28px_rgba(31,36,33,0.12)]"
               style={{ width: `min(100cqw, calc(100cqh * ${ratio}))`, aspectRatio: String(ratio) }}
             >
-              {/* 바닥 장: 앞으로 넘길 때는 다음 장, 뒤로 넘길 때는 지금 장 */}
-              <PageImage page={pages[flip ? (flip.to > flip.from ? flip.to : flip.from) : index]} alt={`${title} ${index + 1}쪽`} />
-              {flip && (
-                <div
-                  ref={leafRef}
-                  className="absolute inset-0 origin-left [transform-style:preserve-3d]"
-                  style={{ transform: flip.to > flip.from ? "rotateY(0deg)" : "rotateY(-180deg)" }}
-                  aria-hidden="true"
-                >
-                  <div className="absolute inset-0 bg-white [backface-visibility:hidden]">
-                    <PageImage page={pages[flip.to > flip.from ? flip.from : flip.to]} alt="" />
-                    {/* 넘어가며 기울수록 지는 그늘 */}
-                    <div
-                      ref={shadeRef}
-                      className="absolute inset-0 opacity-0 bg-gradient-to-l from-black/25 via-black/5 to-transparent"
-                    />
-                  </div>
-                  {/* 종이 뒷면 */}
-                  <div ref={backRef} className="absolute inset-0 bg-[#f1efea] shadow-[inset_-24px_0_40px_rgba(0,0,0,0.08)] [backface-visibility:hidden] [transform:rotateY(180deg)]" />
-                </div>
-              )}
+              <PageImage page={pages[index]} alt={`${title} ${index + 1}쪽`} />
             </div>
-            {/* 앞뒤 장을 미리 받아 두어 넘길 때 빈 화면이 보이지 않게 한다. */}
+            {/* 앞뒤 장을 미리 받아 두어 넘길 때 바로 보이게 한다. */}
             {[index - 1, index + 1]
               .filter((i) => i >= 0 && i < count)
               .map((i) => (

@@ -1,13 +1,26 @@
 "use client";
 // 공유 버튼. 휴대폰에서는 기본 공유 창(카카오톡 등)을 열고, 지원하지 않는 PC 브라우저에서는 링크를 복사한다.
+// path를 주면 그 주소를, 없으면 지금 보는 페이지를 공유한다.
 
 import { useState } from "react";
 
-export default function ShareButton({ title }: { title: string }) {
+const LINK_STYLE = "inline-flex items-center gap-1.5 text-sm text-sub hover:text-forest transition-colors";
+const PILL_STYLE =
+  "inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-4 py-2 text-sm font-medium text-sub hover:border-forest hover:text-forest transition-colors";
+
+export default function ShareButton({
+  title,
+  path,
+  pill = false,
+}: {
+  title: string;
+  path?: string;
+  pill?: boolean; // 테두리 있는 알약 모양 (도구 띠·카드 안)
+}) {
   const [copied, setCopied] = useState(false);
 
   async function share() {
-    const url = window.location.href;
+    const url = path ? new URL(path, window.location.origin).toString() : window.location.href;
     if (navigator.share) {
       try {
         await navigator.share({ title, url });
@@ -31,7 +44,7 @@ export default function ShareButton({ title }: { title: string }) {
     <button
       type="button"
       onClick={share}
-      className="inline-flex items-center gap-1.5 text-sm text-sub hover:text-forest transition-colors"
+      className={pill ? PILL_STYLE : LINK_STYLE}
     >
       <svg
         className="w-4 h-4"
