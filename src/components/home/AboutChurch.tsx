@@ -11,7 +11,11 @@ export default function AboutChurch() {
             <span aria-hidden="true" className="h-px w-5 bg-white/60" />
             드림숲교회
           </p>
-          <h2 className="mt-3 text-[30px] md:text-[44px] font-bold leading-tight">한 절이라도 따라 사는 교회</h2>
+          <h2 className="mt-3 text-[30px] md:text-[44px] font-bold leading-tight">
+            말씀이 삶이 되고
+            <br />
+            섬김이 되는 공동체
+          </h2>
           <p className="mt-5 text-[15px] md:text-[17px] leading-[1.9] text-white/85">
             대한예수교장로회 합동측 경성노회에 속한 교회입니다.
             <br className="hidden md:block" /> 온 교인이 같은 성경 본문을 날마다 함께 묵상하고 나누며,
