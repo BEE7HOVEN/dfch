@@ -1,8 +1,21 @@
 "use client";
 // 갤러리 사진·주보 사진/PDF를 여러 개 골라 브라우저에서 줄인 뒤 R2로 직접 올리는 입력칸.
 // 올린 결과는 숨은 칸(attachments)에, 지우기로 표시한 기존 첨부는 숨은 칸(remove_attachments)에 JSON으로 넘긴다.
+// 사진은 끌어서 순서를 바꿀 수 있고(첫 사진이 대표/표지), 그 순서는 숨은 칸(attachment_order)으로 넘긴다.
 
 import { useEffect, useRef, useState } from "react";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { SortableContext, arrayMove, rectSortingStrategy, sortableKeyboardCoordinates, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { createAttachmentUploadAction } from "@/app/admin/actions";
 import { resizeForUpload } from "./imageResize";
 import { putWithProgress } from "./upload";
@@ -49,6 +62,13 @@ export default function AttachmentUpload({
 }) {
   const [items, setItems] = useState<NewItem[]>([]);
   const [removed, setRemoved] = useState<string[]>([]);
+  // 보이는 순서: 기존 첨부는 "e:<id>", 새로 올리는 것은 "n:<tempId>"
+  const [order, setOrder] = useState<string[]>(() => existing.map((a) => `e:${a.id}`));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), // 살짝 움직여야 끌기 시작 (누름은 단추로)
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }), // 휴대폰은 잠깐 누르고 끌기 (그냥 밀면 화면 스크롤)
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
   const [error, setError] = useState<string | null>(null);
   const [splitting, setSplitting] = useState(false); // PDF 쪽을 사진으로 바꾸는 중
   const previews = useRef<string[]>([]);
@@ -167,6 +187,7 @@ export default function AttachmentUpload({
       } as NewItem,
     }));
     setItems((prev) => [...prev, ...queued.map((q) => q.item)]);
+    setOrder((prev) => [...prev, ...queued.map((q) => `n:${q.item.tempId}`)]);
 
     // 동시에 몇 개씩만 처리해 휴대폰 메모리와 회선을 아낀다.
     let next = 0;
@@ -183,6 +204,37 @@ export default function AttachmentUpload({
   const done = items.filter((i) => i.status === "done");
   const failed = items.filter((i) => i.status === "error").length;
   const label = mode === "images" ? "사진" : "주보 파일 (사진 또는 PDF)";
+
+  // 보이는 칸을 순서대로 모은다.
+  const existingById = new Map(existing.map((a) => [a.id, a]));
+  const itemById = new Map(items.map((i) => [i.tempId, i]));
+  const tiles = order.flatMap((key): Tile[] => {
+    if (key.startsWith("e:")) {
+      const a = existingById.get(key.slice(2));
+      return a && !removed.includes(a.id) ? [{ key, kind: a.kind, image: a.thumbUrl, name: a.fileName, status: "done" }] : [];
+    }
+    const i = itemById.get(key.slice(2));
+    return i ? [{ key, kind: i.kind, image: i.preview, name: i.name, status: i.status, progress: i.progress, error: i.error }] : [];
+  });
+  const firstImageKey = tiles.find((t) => t.kind === "image")?.key;
+
+  // 서버로 넘길 순서: 기존은 id, 새로 올린 것은 R2 위치 (다 올라간 것만)
+  const orderTokens = tiles.flatMap((t) => {
+    if (t.key.startsWith("e:")) return [`id:${t.key.slice(2)}`];
+    const meta = itemById.get(t.key.slice(2))?.meta;
+    return meta && typeof meta.file_key === "string" ? [`key:${meta.file_key}`] : [];
+  });
+
+  const removeTile = (key: string) => {
+    if (key.startsWith("e:")) setRemoved((r) => [...r, key.slice(2)]);
+    else setItems((prev) => prev.filter((x) => x.tempId !== key.slice(2)));
+    setOrder((prev) => prev.filter((k) => k !== key));
+  };
+  const moveToFront = (key: string) => setOrder((prev) => [key, ...prev.filter((k) => k !== key)]);
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return;
+    setOrder((prev) => arrayMove(prev, prev.indexOf(String(active.id)), prev.indexOf(String(over.id))));
+  };
 
   return (
     <div>
@@ -203,6 +255,7 @@ export default function AttachmentUpload({
         value={JSON.stringify(done.map((i) => i.meta))}
       />
       <input type="hidden" name="remove_attachments" value={JSON.stringify(removed)} />
+      <input type="hidden" name="attachment_order" value={JSON.stringify(orderTokens)} />
 
       <p className="mt-2 text-xs text-mute">
         {mode === "images"
@@ -212,64 +265,120 @@ export default function AttachmentUpload({
         {(visibleExisting.length > 0 || items.length > 0) &&
           ` 지금 ${visibleExisting.length + done.length}개${busy ? ", 올리는 중" : ""}${failed ? `, 실패 ${failed}개` : ""}.`}
       </p>
+      {tiles.length > 1 && (
+        <p className="mt-1 text-xs text-forest">
+          사진을 끌어서 순서를 바꿀 수 있습니다(휴대폰은 잠깐 누른 뒤 끌기). 첫 사진이 {mode === "images" ? "대표 사진" : "표지"}이 됩니다.
+        </p>
+      )}
 
-      {(visibleExisting.length > 0 || items.length > 0) && (
-        <ul className="mt-3 grid grid-cols-3 sm:grid-cols-4 gap-2">
-          {visibleExisting.map((a) => (
-            <li key={a.id} className="relative aspect-square rounded-lg overflow-hidden bg-paper">
-              {a.kind === "image" && a.thumbUrl ? (
-                // R2 서명 주소라 next/image 최적화 대상이 아니다.
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={a.thumbUrl} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <PdfTile name={a.fileName} />
-              )}
-              <button
-                type="button"
-                onClick={() => setRemoved((r) => [...r, a.id])}
-                aria-label="이 파일 빼기"
-                className="absolute top-1 right-1 w-7 h-7 rounded-full bg-black/60 text-white text-sm leading-none"
-              >
-                ×
-              </button>
-            </li>
-          ))}
-          {items.map((i) => (
-            <li key={i.tempId} className="relative aspect-square rounded-lg overflow-hidden bg-paper">
-              {i.kind === "image" && i.preview ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={i.preview} alt="" className="w-full h-full object-cover" />
-              ) : i.kind === "pdf" ? (
-                <PdfTile name={i.name} />
-              ) : null}
-              {i.status !== "done" && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/70 text-xs text-sub text-center px-1">
-                  {i.status === "error"
-                    ? i.error
-                    : i.status === "uploading"
-                      ? `${i.progress}%`
-                      : i.status === "converting"
-                        ? "줄이는 중"
-                        : "대기"}
-                </div>
-              )}
-              {(i.status === "done" || i.status === "error") && (
-                <button
-                  type="button"
-                  onClick={() => setItems((prev) => prev.filter((x) => x.tempId !== i.tempId))}
-                  aria-label="이 파일 빼기"
-                  className="absolute top-1 right-1 w-7 h-7 rounded-full bg-black/60 text-white text-sm leading-none"
-                >
-                  ×
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
+      {tiles.length > 0 && (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+          <SortableContext items={tiles.map((t) => t.key)} strategy={rectSortingStrategy}>
+            <ul className="mt-3 grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {tiles.map((t, idx) => (
+                <SortableTile
+                  key={t.key}
+                  tile={t}
+                  index={idx}
+                  isCover={t.key === firstImageKey}
+                  coverLabel={mode === "images" ? "대표" : "표지"}
+                  onRemove={() => removeTile(t.key)}
+                  onMakeCover={t.kind === "image" && t.key !== firstImageKey && t.status === "done" ? () => moveToFront(t.key) : undefined}
+                />
+              ))}
+            </ul>
+          </SortableContext>
+        </DndContext>
       )}
 
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </div>
+  );
+}
+
+interface Tile {
+  key: string;
+  kind: "image" | "pdf";
+  image: string | null;
+  name: string | null;
+  status: NewItem["status"];
+  progress?: number;
+  error?: string;
+}
+
+// 끌어서 옮길 수 있는 사진 한 칸. 오른쪽 위 ×는 빼기, 아래 "대표로"는 맨 앞으로 옮기기.
+function SortableTile({
+  tile,
+  index,
+  isCover,
+  coverLabel,
+  onRemove,
+  onMakeCover,
+}: {
+  tile: Tile;
+  index: number;
+  isCover: boolean;
+  coverLabel: string;
+  onRemove: () => void;
+  onMakeCover?: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: tile.key });
+  return (
+    <li
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      {...attributes}
+      {...listeners}
+      aria-label={`${index + 1}번째 ${tile.kind === "pdf" ? "PDF" : "사진"}${isCover ? ` (${coverLabel})` : ""}`}
+      className={`relative aspect-square rounded-lg overflow-hidden bg-paper touch-manipulation cursor-grab active:cursor-grabbing select-none ${
+        isDragging ? "z-10 shadow-xl ring-2 ring-forest opacity-90" : ""
+      } ${isCover ? "ring-2 ring-forest" : ""}`}
+    >
+      {tile.kind === "image" && tile.image ? (
+        // R2 서명 주소·미리보기 주소라 next/image 최적화 대상이 아니다.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={tile.image} alt="" draggable={false} className="w-full h-full object-cover pointer-events-none" />
+      ) : tile.kind === "pdf" ? (
+        <PdfTile name={tile.name} />
+      ) : null}
+
+      <span className={`absolute top-1 left-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${isCover ? "bg-forest text-white" : "bg-black/50 text-white"}`}>
+        {isCover ? coverLabel : index + 1}
+      </span>
+
+      {tile.status !== "done" && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/70 text-xs text-sub text-center px-1">
+          {tile.status === "error"
+            ? tile.error
+            : tile.status === "uploading"
+              ? `${tile.progress ?? 0}%`
+              : tile.status === "converting"
+                ? "줄이는 중"
+                : "대기"}
+        </div>
+      )}
+      {(tile.status === "done" || tile.status === "error") && (
+        <button
+          type="button"
+          onClick={onRemove}
+          onPointerDown={(e) => e.stopPropagation()}
+          aria-label="이 파일 빼기"
+          className="absolute top-1 right-1 w-7 h-7 rounded-full bg-black/60 text-white text-sm leading-none"
+        >
+          ×
+        </button>
+      )}
+      {onMakeCover && (
+        <button
+          type="button"
+          onClick={onMakeCover}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="absolute bottom-1 inset-x-1 rounded-md bg-white/90 py-1 text-[11px] font-semibold text-forest hover:bg-white"
+        >
+          {coverLabel}로
+        </button>
+      )}
+    </li>
   );
 }
 

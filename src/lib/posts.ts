@@ -249,6 +249,42 @@ export async function addAttachments(
   }
 }
 
+// 관리자가 끌어서 정한 순서대로 첨부 순번을 다시 매긴다 (첫 사진이 대표/표지).
+export async function setAttachmentOrder(postId: string, orderedIds: string[]): Promise<void> {
+  const valid = orderedIds.filter((id) => UUID_RE.test(id));
+  if (valid.length === 0) return;
+  const sql = getSql();
+  await sql`
+    UPDATE attachments AS a SET sort_order = o.ord - 1
+    FROM unnest(${valid}::uuid[]) WITH ORDINALITY AS o(id, ord)
+    WHERE a.id = o.id AND a.post_id = ${postId}`;
+}
+
+// 메인 갤러리용: 앨범마다 앞쪽 사진 몇 장(순서대로).
+export async function getAlbumPhotos(
+  postIds: string[],
+  perAlbum: number,
+): Promise<Map<string, Attachment[]>> {
+  const result = new Map<string, Attachment[]>();
+  if (postIds.length === 0) return result;
+  const sql = getSql();
+  const rows = (await sql`
+    SELECT id, post_id, kind, file_key, thumb_key, width, height, file_name, size_bytes, sort_order
+    FROM (
+      SELECT *, row_number() OVER (PARTITION BY post_id ORDER BY sort_order, created_at) AS rn
+      FROM attachments
+      WHERE post_id = ANY(${postIds}::uuid[]) AND kind = 'image'
+    ) t
+    WHERE rn <= ${perAlbum}
+    ORDER BY post_id, rn`) as Attachment[];
+  for (const row of rows) {
+    const list = result.get(row.post_id) ?? [];
+    list.push(row);
+    result.set(row.post_id, list);
+  }
+  return result;
+}
+
 // 지운 첨부의 R2 위치를 돌려준다(호출하는 쪽에서 R2 파일을 지운다).
 export async function removeAttachments(
   postId: string,

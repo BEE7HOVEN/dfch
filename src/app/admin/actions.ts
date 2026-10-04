@@ -15,6 +15,7 @@ import {
   getAttachments,
   getPost,
   removeAttachments,
+  setAttachmentOrder,
   setBannerEndsOn,
   updatePost,
   type NewAttachment,
@@ -230,6 +231,31 @@ function readNewAttachments(formData: FormData, board: Board): NewAttachment[] {
   });
 }
 
+// 끌어서 정한 첨부 순서. 기존 첨부는 "id:<uuid>", 이번에 올린 첨부는 "key:<R2 위치>"로 온다.
+function readAttachmentOrder(formData: FormData): string[] {
+  try {
+    const raw = JSON.parse(String(formData.get("attachment_order") ?? "[]"));
+    return Array.isArray(raw) ? raw.filter((x): x is string => typeof x === "string").slice(0, 500) : [];
+  } catch {
+    return [];
+  }
+}
+
+// 저장 뒤 실제 첨부 목록에 순서를 맞춰 적용한다. 순서에 없는 첨부는 원래 순서대로 뒤에 붙인다.
+async function applyAttachmentOrder(postId: string, order: string[]): Promise<void> {
+  if (order.length === 0) return;
+  const current = await getAttachments(postId);
+  const byId = new Map(current.map((a) => [a.id, a.id]));
+  const byKey = new Map(current.map((a) => [a.file_key, a.id]));
+  const ordered: string[] = [];
+  for (const token of order) {
+    const id = token.startsWith("id:") ? byId.get(token.slice(3)) : token.startsWith("key:") ? byKey.get(token.slice(4)) : undefined;
+    if (id && !ordered.includes(id)) ordered.push(id);
+  }
+  for (const a of current) if (!ordered.includes(a.id)) ordered.push(a.id);
+  await setAttachmentOrder(postId, ordered);
+}
+
 function readRemovedAttachmentIds(formData: FormData): string[] {
   try {
     const raw = JSON.parse(String(formData.get("remove_attachments") ?? "[]"));
@@ -315,6 +341,7 @@ export async function createPostAction(
     ends_on: banner.ends_on,
   });
   await addAttachments(id, attachments);
+  await applyAttachmentOrder(id, readAttachmentOrder(formData));
   revalidatePath(board.path);
   revalidatePath("/"); // 메인의 최근 공지·묵상
   revalidatePath("/admin");
@@ -367,6 +394,7 @@ export async function updatePostAction(
   await addAttachments(id, added);
   const removedKeys = await removeAttachments(id, removedIds);
   await deleteObjectsQuietly(removedKeys);
+  await applyAttachmentOrder(id, readAttachmentOrder(formData));
   if (existing.audio_key !== audio_key) {
     await deleteAudioQuietly(existing.audio_key);
   }
