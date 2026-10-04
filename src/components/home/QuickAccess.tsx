@@ -12,10 +12,10 @@ const FIRST_VISIT = [
 const MENUS = [
   { title: "설교말씀", desc: "주일·수요 설교와 예배 영상", href: "/media", strong: true },
   { title: "매일의 묵상", desc: "날마다 올라오는 묵상 녹음", href: "/meditation", strong: true },
-  { title: "목회편지", desc: "담임목사님의 편지", href: "/letters" },
+  { title: "유튜브 채널", desc: "드림숲교회 영상 모음", href: YOUTUBE_URL, external: true, strong: true },
   { title: "주보", desc: "이번 주 주보 보기", href: "/news/bulletin" },
   { title: "갤러리", desc: "예배와 행사 사진", href: "/news/gallery" },
-  { title: "유튜브 채널", desc: "드림숲교회 영상 모음", href: YOUTUBE_URL, external: true },
+  { title: "목회편지", desc: "담임목사님의 편지", href: "/letters" },
 ];
 
 function Arrow() {
