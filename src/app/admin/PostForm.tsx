@@ -120,6 +120,11 @@ export default function PostForm({
           onBusyChange={setUploading}
         />
       )}
+      {board.bannerFields && (
+        <p className="-mt-3 text-xs text-mute">
+          배너 그림 권장 크기: 가로 1920 × 세로 1010 (1.9:1). 이 비율이면 메인에서 꽉 차게 보입니다. 세로 포스터는 잘리지 않게 전체가 보입니다.
+        </p>
+      )}
 
       <div>
         <label htmlFor="content" className="block text-sm text-sub mb-2">

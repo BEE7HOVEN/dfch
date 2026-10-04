@@ -26,7 +26,7 @@ export default async function HomeHero() {
   return (
     <section className="pt-5 md:pt-8">
       <div className="shell grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_clamp(320px,30vw,420px)] gap-4 lg:gap-6 lg:h-[480px]">
-        <div className="aspect-[4/3] lg:aspect-auto lg:h-full">
+        <div className="aspect-[19/10] lg:aspect-auto lg:h-full">
           <BannerSlider items={banners} />
         </div>
         <SermonCard />
