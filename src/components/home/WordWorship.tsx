@@ -1,5 +1,5 @@
 "use client";
-// 메인 말씀과 예배: 주일설교 3개(맨 위 카드에 나온 최신 1개 다음부터)와 최근 수요설교 3개. 유튜브 차단을 피한 /api/youtube(Edge, 1시간 캐시)를 브라우저에서 부른다.
+// 메인 말씀과 예배: 주일설교 3개(맨 위 카드에 나온 최신 1개 다음부터)와 최근 수요설교 3개, 그 아래 매일의 묵상(children). 유튜브 차단을 피한 /api/youtube(Edge, 1시간 캐시)를 브라우저에서 부른다.
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -82,7 +82,7 @@ function VideoRow({ label, tab, videos }: { label: string; tab: string; videos: 
   );
 }
 
-export default function WordWorship() {
+export default function WordWorship({ children }: { children?: React.ReactNode }) {
   // undefined = 불러오는 중, null = 못 불러옴
   const [rows, setRows] = useState<{ sunday: Video[]; wednesday: Video[] } | null | undefined>(undefined);
 
@@ -99,7 +99,8 @@ export default function WordWorship() {
       .catch(() => setRows(null));
   }, []);
 
-  if (rows === null || (rows && rows.sunday.length + rows.wednesday.length === 0)) return null; // 못 불러오면 칸을 숨긴다.
+  // 영상을 못 불러오면 영상 줄만 숨기고 묵상 줄은 그대로 둔다.
+  const noVideos = rows === null || (rows !== undefined && rows.sunday.length + rows.wednesday.length === 0);
 
   return (
     <section className="py-16 md:py-24">
@@ -111,8 +112,13 @@ export default function WordWorship() {
           linkLabel="설교말씀 전체보기"
         />
         <div className="space-y-12 md:space-y-14">
-          <VideoRow label="주일설교" tab="sunday" videos={rows?.sunday} />
-          <VideoRow label="수요설교" tab="wednesday" videos={rows?.wednesday} />
+          {!noVideos && (
+            <>
+              <VideoRow label="주일설교" tab="sunday" videos={rows?.sunday} />
+              <VideoRow label="수요설교" tab="wednesday" videos={rows?.wednesday} />
+            </>
+          )}
+          {children}
         </div>
       </div>
     </section>
