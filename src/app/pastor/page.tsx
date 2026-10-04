@@ -14,7 +14,7 @@ export default function PastorPage() {
         <section className="shell pb-20 md:pb-28">
           <div className="border-t-2 border-ink pt-10 md:pt-14">
             <div className="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-10 lg:gap-20 items-start">
-              <div className="md:sticky md:top-[112px]">
+              <div>
                 <Image
                   src="/images/pastor-photo.jpeg"
                   alt="담임목사 조성호"
