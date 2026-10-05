@@ -20,6 +20,8 @@ import { createAttachmentUploadAction } from "@/app/admin/actions";
 import { resizeForUpload } from "./imageResize";
 import { putWithProgress } from "./upload";
 import { PDF_PAGE_LONG_SIDE, PDF_PAGE_QUALITY, pdfToPageImages } from "./pdfPages";
+import { loadBox, pagesToPdf, redactPage, saveBox, type Box } from "./redact";
+import RedactPanel from "./RedactPanel";
 
 export interface ExistingAttachment {
   id: string;
@@ -70,7 +72,9 @@ export default function AttachmentUpload({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
   const [error, setError] = useState<string | null>(null);
-  const [splitting, setSplitting] = useState(false); // PDF 쪽을 사진으로 바꾸는 중
+  const [splitting, setSplitting] = useState(false); // PDF 쪽을 사진으로 바꾸는 중 (가릴 곳 확인 대기 포함)
+  // 주보 PDF 1쪽에서 가릴 곳 확인을 기다리는 중이면 그 미리보기와 답을 넘길 함수
+  const [redactAsk, setRedactAsk] = useState<{ url: string; box: Box; resolve: (box: Box | null) => void } | null>(null);
   const previews = useRef<string[]>([]);
   const pdfPages = useRef(new WeakSet<File>()); // PDF에서 바꾼 쪽 사진 (더 크게 올림)
 
@@ -157,18 +161,35 @@ export default function AttachmentUpload({
     const picked = notHwp.filter((f) => mode === "images+pdf" || !isPdf(f));
     if (picked.length < notHwp.length) setError("PDF는 올릴 수 없습니다. 사진만 골라주세요.");
 
-    // 주보 PDF는 저장용으로 그대로 올리고, 쪽마다 사진으로도 바꿔 올려 넘겨 보기에 쓴다.
+    // 주보 PDF는 쪽마다 사진으로 바꿔 넘겨 보기에 쓰고, 1쪽에서 가릴 곳(헌금자 명단 등)을 확인받아 하얗게 지운다.
+    // 가렸으면 원본 PDF 대신 가린 쪽 사진으로 다시 만든 PDF를 저장용으로 올린다.
     const accepted: File[] = [];
     for (const file of picked) {
-      accepted.push(file);
-      if (!isPdf(file)) continue;
+      if (!isPdf(file)) {
+        accepted.push(file);
+        continue;
+      }
       setSplitting(true);
       try {
         const pages = await pdfToPageImages(file);
+        let pdfFile = file;
+        if (mode === "images+pdf" && pages.length > 0) {
+          const url = URL.createObjectURL(pages[0]);
+          previews.current.push(url);
+          const box = await new Promise<Box | null>((resolve) => setRedactAsk({ url, box: loadBox(), resolve }));
+          setRedactAsk(null);
+          if (box) {
+            saveBox(box);
+            pages[0] = await redactPage(pages[0], box);
+            pdfFile = await pagesToPdf(pages, file.name);
+          }
+        }
         pages.forEach((p) => pdfPages.current.add(p));
-        accepted.push(...pages);
+        accepted.push(pdfFile, ...pages);
       } catch (err) {
         console.error(err);
+        setRedactAsk(null);
+        accepted.push(file);
         setError("PDF 쪽을 사진으로 바꾸지 못해 PDF만 올립니다. 넘겨 보기를 쓰려면 주보 사진을 따로 올려 주세요.");
       } finally {
         setSplitting(false);
@@ -261,10 +282,19 @@ export default function AttachmentUpload({
         {mode === "images"
           ? "여러 장을 한 번에 고를 수 있습니다. 사진은 올리기 전에 알맞은 크기로 줄여집니다."
           : "주보 사진 여러 장이나 PDF를 고르세요. PDF는 쪽마다 사진으로도 바꿔 올려 넘겨 보기가 됩니다."}
-        {splitting && " PDF 쪽을 사진으로 바꾸는 중..."}
+        {splitting && (redactAsk ? " 아래에서 가릴 곳을 확인해 주세요." : " PDF 쪽을 사진으로 바꾸는 중...")}
         {(visibleExisting.length > 0 || items.length > 0) &&
           ` 지금 ${visibleExisting.length + done.length}개${busy ? ", 올리는 중" : ""}${failed ? `, 실패 ${failed}개` : ""}.`}
       </p>
+      {redactAsk && (
+        <RedactPanel
+          imageUrl={redactAsk.url}
+          initialBox={redactAsk.box}
+          onConfirm={(box) => redactAsk.resolve(box)}
+          onSkip={() => redactAsk.resolve(null)}
+        />
+      )}
+
       {tiles.length > 1 && (
         <p className="mt-1 text-xs text-forest">
           사진을 끌어서 순서를 바꿀 수 있습니다(휴대폰은 잠깐 누른 뒤 끌기). 첫 사진이 {mode === "images" ? "대표 사진" : "표지"}이 됩니다.
