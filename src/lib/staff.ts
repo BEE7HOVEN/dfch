@@ -22,11 +22,11 @@ export const staffGroups: StaffGroup[] = [
     ],
   },
   {
-    title: "장로",
+    title: "시무장로",
     members: [
-      { role: "장로", name: "조종수" },
-      { role: "장로", name: "이충영" },
-      { role: "장로", name: "이원종" },
+      { role: "시무장로", name: "조종수" },
+      { role: "시무장로", name: "이충영" },
+      { role: "시무장로", name: "이원종" },
     ],
   },
 ];
