@@ -5,7 +5,7 @@ import { YOUTUBE_URL } from "@/lib/site";
 
 const FIRST_VISIT = [
   { no: "01", title: "교회 소개", desc: "드림숲교회는 어떤 교회인가요", href: "/about" },
-  { no: "02", title: "예배 안내", desc: "주일·수요 예배와 새벽묵상 시간", href: "/service" },
+  { no: "02", title: "예배 안내", desc: "주일·어린이·수요 예배 시간", href: "/service" },
   { no: "03", title: "오시는 길", desc: "주소와 대중교통 안내", href: "/location" },
 ];
 

@@ -6,6 +6,7 @@ import PageHeader from "@/components/PageHeader";
 
 const SERVICES = [
   { name: "주일예배", day: "일요일", time: "오전 11시" },
+  { name: "어린이예배", day: "일요일", time: "오전 11시" },
   { name: "수요예배", day: "수요일", time: "저녁 7시 30분" },
   { name: "새벽묵상", day: "매일 (온라인)", time: "오전 6시" },
 ];
@@ -20,7 +21,7 @@ export default function ServicePage() {
         <section className="shell pb-20 md:pb-28">
           <div className="border-t-2 border-ink pt-10 md:pt-14">
             <h2 className="text-[22px] md:text-[26px] font-bold text-ink">예배시간</h2>
-            <ul className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            <ul className="mt-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
               {SERVICES.map((s) => (
                 <li key={s.name} className="rounded-[24px] bg-mist p-7 md:p-9">
                   <p className="text-sm font-semibold text-forest">{s.name}</p>

@@ -6,6 +6,7 @@ import { CHURCH_ADDRESS, CHURCH_PHONE, YOUTUBE_URL } from "@/lib/site";
 
 const SERVICE_TIMES = [
   { name: "주일예배", time: "일요일 오전 11시" },
+  { name: "어린이예배", time: "일요일 오전 11시" },
   { name: "수요예배", time: "수요일 저녁 7시 30분" },
   { name: "새벽묵상", time: "매일 오전 6시 (온라인)" },
 ];
