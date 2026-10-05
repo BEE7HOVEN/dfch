@@ -11,7 +11,7 @@ export interface StaffGroup {
   members: StaffMember[];
 }
 
-// 이름은 주보와 영상 자막에서 찾은 임시 값이다. 확정되면 고친다.
+// 이름은 2026-10-05 확정된 값이다 (원로목사는 넣지 않기로 함).
 export const staffGroups: StaffGroup[] = [
   {
     title: "교역자",
