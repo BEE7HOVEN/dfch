@@ -1,7 +1,8 @@
-// 교회 안내 > 섬기는 분들 페이지 (담임목사 인사말)
+// 교회 안내 > 섬기는 분들 페이지 (담임목사 인사말 + 교역자·장로)
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import StaffGrid from "@/components/StaffGrid";
 import Image from "next/image";
 
 export default function PastorPage() {
@@ -100,6 +101,15 @@ export default function PastorPage() {
                   담임목사 &nbsp;조 성 호
                 </p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="shell pb-20 md:pb-28">
+          <div className="border-t-2 border-ink pt-10 md:pt-14">
+            <h2 className="text-[22px] md:text-[28px] font-bold leading-snug text-ink">함께 섬기는 분들</h2>
+            <div className="mt-10 md:mt-12">
+              <StaffGrid />
             </div>
           </div>
         </section>
