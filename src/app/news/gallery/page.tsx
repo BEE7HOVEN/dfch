@@ -9,6 +9,9 @@ import { getAlbumCovers, getPostsByCategory } from "@/lib/posts";
 import { formatPostDate } from "@/lib/format";
 import { isAuthenticated } from "@/lib/auth";
 import { createViewUrl } from "@/lib/r2";
+import { pageMetadata } from "@/lib/pageMetadata";
+
+export const metadata = pageMetadata("/news/gallery", "함께 예배하고 섬긴 자리를 사진으로 나눕니다.");
 
 export const dynamic = "force-dynamic";
 

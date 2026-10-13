@@ -4,6 +4,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import { CHURCH_ADDRESS, CHURCH_PHONE } from "@/lib/site";
+import { pageMetadata } from "@/lib/pageMetadata";
+
+export const metadata = pageMetadata("/location", "경기도 군포시 삼성로69번길 13, 산본역에서 오시는 길과 주차 안내.");
 
 const ROUTES = [
   {

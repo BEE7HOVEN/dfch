@@ -73,6 +73,19 @@ export async function getRecentPosts(
   return rows as Post[];
 }
 
+// 사이트맵용: 검색에 올릴 분류의 글 주소와 수정 시각만.
+export async function getSitemapPosts(
+  categories: BoardCategory[],
+): Promise<Pick<Post, "id" | "category" | "updated_at">[]> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, category, updated_at::text AS updated_at
+    FROM posts
+    WHERE category = ANY(${categories})
+    ORDER BY post_date DESC, created_at DESC`;
+  return rows as Pick<Post, "id" | "category" | "updated_at">[];
+}
+
 export async function getAllPosts(): Promise<Post[]> {
   const sql = getSql();
   const rows = await sql`

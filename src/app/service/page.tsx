@@ -3,6 +3,9 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import { pageMetadata } from "@/lib/pageMetadata";
+
+export const metadata = pageMetadata("/service", "주일예배·어린이예배 주일 오전 11시, 수요예배 저녁 7시 30분, 새벽묵상 오전 6시.");
 
 const SERVICES = [
   { name: "주일예배", day: "일요일", time: "오전 11시" },

@@ -4,6 +4,9 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import YouTubeMedia from "@/components/YouTubeMedia";
 import { TABS } from "@/lib/sermonTabs";
+import { pageMetadata } from "@/lib/pageMetadata";
+
+export const metadata = pageMetadata("/media", "주일설교와 수요설교 영상을 모아 봅니다.");
 
 export default async function MediaPage({
   searchParams,

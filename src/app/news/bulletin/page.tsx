@@ -11,11 +11,12 @@ import { formatPostDate } from "@/lib/format";
 import { isAuthenticated } from "@/lib/auth";
 import { createViewUrl } from "@/lib/r2";
 import { NO_SEARCH } from "@/lib/noSearch";
+import { pageMetadata } from "@/lib/pageMetadata";
 
 export const dynamic = "force-dynamic";
 
 // 주보에는 교인 정보가 있어 목록도 검색에서 뺀다.
-export const metadata = { robots: NO_SEARCH };
+export const metadata = { ...pageMetadata("/news/bulletin", "드림숲교회 주보입니다."), alternates: undefined, robots: NO_SEARCH };
 
 const board = boards.bulletin;
 

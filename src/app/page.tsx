@@ -7,6 +7,9 @@ import WordWorship from "@/components/home/WordWorship";
 import RecentAlbums from "@/components/home/RecentAlbums";
 import RecentMeditations from "@/components/home/RecentMeditations";
 import AboutChurch from "@/components/home/AboutChurch";
+import ChurchJsonLd from "@/components/ChurchJsonLd";
+
+export const metadata = { alternates: { canonical: "/" } };
 
 // 배너·최근 주보·공지·묵상·앨범을 보여 주므로 5분마다 새로 만든다. 관리자가 글을 바꾸면 그 즉시 갱신된다(actions.ts).
 export const revalidate = 300;
@@ -14,6 +17,7 @@ export const revalidate = 300;
 export default function Home() {
   return (
     <>
+      <ChurchJsonLd />
       <Header />
       <main>
         {/* 첫 화면: 큰 교회 사진 위 교회 소개 */}

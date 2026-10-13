@@ -1,17 +1,14 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from "@/lib/site";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+import { BASE_OPEN_GRAPH } from "@/lib/pageMetadata";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "드림숲교회",
-  description: "말씀이 삶이 되고 나눔이 섬김이 되는 공동체 - 드림숲교회",
-  openGraph: {
-    siteName: SITE_NAME,
-    locale: "ko_KR",
-    type: "website",
-    images: [DEFAULT_OG_IMAGE],
-  },
+  // 하위 페이지 제목 뒤에 교회 이름을 붙인다 (예: "교회 소개 | 드림숲교회").
+  title: { default: `${SITE_NAME} · 군포 산본`, template: `%s | ${SITE_NAME}` },
+  description: SITE_DESCRIPTION,
+  openGraph: BASE_OPEN_GRAPH,
 };
 
 export default function RootLayout({

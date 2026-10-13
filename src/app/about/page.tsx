@@ -4,6 +4,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import ChurchIntro from "@/components/ChurchIntro";
+import { pageMetadata } from "@/lib/pageMetadata";
+
+export const metadata = pageMetadata("/about", "드림숲교회가 걸어온 길과 믿음의 고백을 소개합니다.");
 
 export default function AboutPage() {
   return (

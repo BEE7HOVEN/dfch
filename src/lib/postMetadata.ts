@@ -33,8 +33,10 @@ export async function postMetadata(board: Board, id: string): Promise<Metadata> 
   }
 
   return {
-    title: `${post.title} | ${board.label} | ${SITE_NAME}`,
+    // 뒤의 "| 드림숲교회"는 레이아웃 template이 붙인다.
+    title: `${post.title} | ${board.label}`,
     description,
+    alternates: { canonical: `${board.path}/${id}` },
     openGraph: {
       title: post.title,
       description,

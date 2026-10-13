@@ -24,7 +24,7 @@ type Props = { params: Promise<{ id: string }> };
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
   // 주보에는 헌금자 명단·기도 제목 같은 교인 정보가 있어 검색에서 뺀다.
-  return { ...(await postMetadata(board, id)), robots: NO_SEARCH };
+  return { ...(await postMetadata(board, id)), alternates: undefined, robots: NO_SEARCH };
 }
 
 function NeighborLink({ post, label, align }: { post: Post | null; label: string; align: "left" | "right" }) {

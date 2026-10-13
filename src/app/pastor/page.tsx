@@ -4,6 +4,9 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import StaffGrid from "@/components/StaffGrid";
 import Image from "next/image";
+import { pageMetadata } from "@/lib/pageMetadata";
+
+export const metadata = pageMetadata("/pastor", "담임목사와 교역자, 시무장로를 소개합니다.");
 
 export default function PastorPage() {
   return (
