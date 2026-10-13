@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   title: { default: `${SITE_NAME} · 군포 산본`, template: `%s | ${SITE_NAME}` },
   description: SITE_DESCRIPTION,
   openGraph: BASE_OPEN_GRAPH,
+  // 네이버 서치어드바이저 소유 확인 (구글은 Cloudflare DNS TXT로 확인).
+  verification: { other: { "naver-site-verification": "a476bc0e91ec3831d6eb1cbbf156eb5a8114834f" } },
 };
 
 export default function RootLayout({
