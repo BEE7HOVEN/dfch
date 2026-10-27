@@ -20,6 +20,14 @@ import {
   updatePost,
   type NewAttachment,
 } from "@/lib/posts";
+import {
+  ATTEMPTS_PER_ROUND,
+  clearFailures,
+  clientIp,
+  lockedSeconds,
+  recordFailure,
+  untilLabel,
+} from "@/lib/loginThrottle";
 import { addDays, seoulToday } from "@/lib/format";
 import { boards, isBoardCategory, type Board } from "@/lib/boards";
 import { createUploadUrl, deleteObject, deleteObjectsQuietly } from "@/lib/r2";
@@ -38,9 +46,37 @@ export async function loginAction(
   formData: FormData,
 ): Promise<FormState> {
   const password = formData.get("password");
+
+  // 시도 기록을 못 읽어도(DB 오류) 관리자가 못 들어가는 일이 없도록 제한만 건너뛴다.
+  let ip: string | null = null;
+  try {
+    ip = await clientIp();
+    const locked = await lockedSeconds(ip);
+    if (locked > 0) {
+      return { error: `비밀번호를 여러 번 틀려 잠겼습니다. ${untilLabel(locked)} 뒤에 다시 시도해 주세요.` };
+    }
+  } catch (e) {
+    console.error(e);
+    ip = null;
+  }
+
   if (!checkPassword(password)) {
+    if (ip) {
+      try {
+        const { failures, lockSeconds } = await recordFailure(ip);
+        if (lockSeconds > 0) {
+          return { error: `비밀번호를 ${failures}번 틀렸습니다. ${untilLabel(lockSeconds)} 뒤에 다시 시도해 주세요.` };
+        }
+        const left = ATTEMPTS_PER_ROUND - (failures % ATTEMPTS_PER_ROUND);
+        return { error: `비밀번호가 올바르지 않습니다. (${left}번 더 틀리면 잠깁니다)` };
+      } catch (e) {
+        console.error(e);
+      }
+    }
     return { error: "비밀번호가 올바르지 않습니다." };
   }
+
+  if (ip) await clearFailures(ip).catch((e) => console.error(e));
   await createSession();
   redirect("/admin");
 }
