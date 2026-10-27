@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import type { Metadata } from "next";
 import { BASE_OPEN_GRAPH, pageMetadata } from "@/lib/pageMetadata";
-import { CAPACITY, CONCERT_AT_LABEL, LOW_SEATS, ONSITE_RESERVED, getSeatStatus } from "@/lib/concert";
+import { CAPACITY, CONCERT_AT_LABEL, LOW_SEATS, getSeatStatus } from "@/lib/concert";
 import ConcertForm from "./ConcertForm";
 
 const TITLE = "초청음악회 예매";
@@ -51,7 +51,7 @@ export default async function ConcertPage() {
               >
                 <div className="h-full rounded-full bg-forest" style={{ width: `${(filled / CAPACITY) * 100}%` }} />
               </div>
-              <p className="mt-3 text-[13px] text-mute">현장 접수 {ONSITE_RESERVED}석은 미리 제외했습니다. 좌석은 지정하지 않습니다.</p>
+              <p className="mt-3 text-[13px] text-mute">좌석은 지정하지 않습니다.</p>
               {status.remaining > 0 && status.remaining <= LOW_SEATS && !status.closed && (
                 <p className="mt-2 text-[14px] font-semibold text-forest">얼마 남지 않았습니다. 서둘러 예매해 주세요.</p>
               )}
