@@ -118,7 +118,7 @@ export default function ConcertForm({ remaining }: { remaining: number }) {
             <div><dt className="inline font-semibold text-ink">이용 목적 </dt><dd className="inline">공연 예매 확인, 입장 확인, 공연 변경·취소 시 연락</dd></div>
             <div><dt className="inline font-semibold text-ink">보유 기간 </dt><dd className="inline">공연 종료 후 7일까지({DESTROY_BY_LABEL}) 보관한 뒤 파기합니다. 파기는 전자 파일(데이터베이스 기록)을 삭제하는 방식입니다.</dd></div>
             <div><dt className="inline font-semibold text-ink">동의 거부 </dt><dd className="inline">동의하지 않을 수 있으며, 동의하지 않으면 온라인 예매를 할 수 없습니다(현장 접수는 가능합니다).</dd></div>
-            <div><dt className="inline font-semibold text-ink">저장 위탁 </dt><dd className="inline">예매 정보는 홈페이지 운영 서버(Vercel, Neon)에 저장됩니다. 그 밖에 제3자에게 제공하지 않습니다.</dd></div>
+            <div><dt className="inline font-semibold text-ink">저장 위탁 </dt><dd className="inline">예매 정보는 홈페이지 운영 서버에 저장됩니다. 그 밖에 제3자에게 제공하지 않습니다.</dd></div>
             <div><dt className="inline font-semibold text-ink">문의·열람·삭제 요청 </dt><dd className="inline">드림숲교회 031-421-6191</dd></div>
           </dl>
         </details>
