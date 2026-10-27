@@ -5,8 +5,8 @@ import { CAPACITY, CONCERT_AT_LABEL, LOW_SEATS, getSeatStatus } from "@/lib/conc
 import { CHURCH_ADDRESS, SITE_NAME } from "@/lib/site";
 import ConcertForm from "./ConcertForm";
 
-const TITLE = "초청음악회 예매";
-const DESCRIPTION = "드림숲교회 초청음악회 예매 안내입니다. 남은 좌석을 확인하고 예매하세요.";
+const TITLE = "3인초청음악회 예매";
+const DESCRIPTION = "드림숲교회 3인초청음악회 예매 안내입니다. 남은 좌석을 확인하고 예매하세요.";
 export const metadata: Metadata = {
   ...pageMetadata("/concert", DESCRIPTION),
   title: TITLE,
@@ -27,7 +27,7 @@ export default async function ConcertPage() {
         <div className="space-y-8">
           <header>
             <p className="text-[13px] font-semibold tracking-wide text-forest">{SITE_NAME}</p>
-            <h1 className="mt-2 text-[28px] font-bold leading-tight text-ink md:text-[32px]">초청음악회 예매</h1>
+            <h1 className="mt-2 text-[28px] font-bold leading-tight text-ink md:text-[32px]">3인초청음악회 예매</h1>
             <p className="mt-3 text-[15px] leading-relaxed text-sub">
               {CONCERT_AT_LABEL}
               <br />
