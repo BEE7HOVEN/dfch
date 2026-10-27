@@ -7,6 +7,40 @@ export * from "@/lib/concertConfig";
 // 동시에 여러 명이 눌러도 한 번에 한 건씩 확인하도록 거는 잠금 번호
 const LOCK_KEY = 20261205;
 
+// 표가 없으면 만든다 (db/migrations/004_concert.sql과 같은 내용, 이미 있으면 아무 일도 하지 않는다).
+// 운영 DB에 따로 SQL을 돌리지 않아도 배포만으로 준비되게 하려는 장치로, 서버가 처음 쓸 때 한 번만 확인한다.
+let schemaReady: Promise<void> | null = null;
+
+function ensureSchema(): Promise<void> {
+  schemaReady ??= (async () => {
+    const sql = getSql();
+    await sql.transaction([
+      sql`SELECT pg_advisory_xact_lock(${LOCK_KEY + 1})`,
+      sql`CREATE TABLE IF NOT EXISTS concert_reservations (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        number serial NOT NULL,
+        name text NOT NULL,
+        phone text NOT NULL,
+        party_size int NOT NULL CHECK (party_size BETWEEN 1 AND 4),
+        status text NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'cancelled')),
+        consented_at timestamptz NOT NULL,
+        created_at timestamptz NOT NULL DEFAULT now()
+      )`,
+      sql`CREATE UNIQUE INDEX IF NOT EXISTS concert_reservations_active_phone
+        ON concert_reservations (phone) WHERE status = 'active'`,
+      sql`CREATE TABLE IF NOT EXISTS concert_config (
+        id int PRIMARY KEY CHECK (id = 1),
+        open boolean NOT NULL DEFAULT true
+      )`,
+      sql`INSERT INTO concert_config (id, open) VALUES (1, true) ON CONFLICT DO NOTHING`,
+    ]);
+  })().catch((e) => {
+    schemaReady = null; // 실패하면 다음 요청에서 다시 시도
+    throw e;
+  });
+  return schemaReady;
+}
+
 export interface Reservation {
   id: string;
   number: number;
@@ -25,6 +59,7 @@ export interface SeatStatus {
 }
 
 export async function getSeatStatus(): Promise<SeatStatus> {
+  await ensureSchema();
   const sql = getSql();
   const [seats, config] = await Promise.all([
     sql`SELECT COALESCE(SUM(party_size), 0)::int AS booked FROM concert_reservations WHERE status = 'active'`,
@@ -73,6 +108,7 @@ export async function reserve(input: { name: string; phone: string; party: numbe
 // --- 관리자 ---
 
 export async function listReservations(): Promise<Reservation[]> {
+  await ensureSchema();
   const rows = await getSql()`
     SELECT id, number, name, phone, party_size, status, created_at::text AS created_at
     FROM concert_reservations ORDER BY number
