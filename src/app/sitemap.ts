@@ -14,6 +14,7 @@ const EXCLUDED_PAGES = new Set([boards.bulletin.path]);
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const pages: MetadataRoute.Sitemap = [
     { url: SITE_URL, changeFrequency: "daily", priority: 1 },
+    { url: `${SITE_URL}/concert`, changeFrequency: "daily", priority: 0.9 }, // 초청음악회 예매
     ...navGroups
       .flatMap((g) => g.children)
       .filter((c) => !EXCLUDED_PAGES.has(c.href))

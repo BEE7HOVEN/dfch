@@ -202,11 +202,16 @@ export default async function AdminPage({
                 </Link>
               ))}
             </nav>
-            <form action={logoutAction} className="shrink-0 pb-3">
-              <button type="submit" className="text-sm text-mute hover:text-forest">
-                로그아웃
-              </button>
-            </form>
+            <div className="shrink-0 pb-3 flex items-center gap-4">
+              <Link href="/admin/concert" className="text-sm font-semibold text-forest hover:text-forest-deep">
+                음악회 예매
+              </Link>
+              <form action={logoutAction}>
+                <button type="submit" className="text-sm text-mute hover:text-forest">
+                  로그아웃
+                </button>
+              </form>
+            </div>
           </div>
 
           {/* 이 게시판 도구 */}
