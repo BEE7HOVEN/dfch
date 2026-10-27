@@ -1,10 +1,8 @@
 // 초청음악회 예매 페이지: 남은 좌석을 보여 주고 이름·연락처·인원을 받는다.
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import PageHeader from "@/components/PageHeader";
 import type { Metadata } from "next";
 import { BASE_OPEN_GRAPH, pageMetadata } from "@/lib/pageMetadata";
 import { CAPACITY, CONCERT_AT_LABEL, LOW_SEATS, getSeatStatus } from "@/lib/concert";
+import { CHURCH_ADDRESS, SITE_NAME } from "@/lib/site";
 import ConcertForm from "./ConcertForm";
 
 const TITLE = "초청음악회 예매";
@@ -23,16 +21,22 @@ export default async function ConcertPage() {
   const soldOut = status.remaining === 0;
 
   return (
-    <>
-      <Header />
-      <main>
-        <PageHeader
-          path="/concert"
-          title="초청음악회 예매"
-          description={`${CONCERT_AT_LABEL} · 드림숲교회 · 예매는 12월 5일 정오까지 받습니다.`}
-        />
-        <section className="shell pb-20 md:pb-28">
-          <div className="reading space-y-8">
+    // 예매 링크만 단독으로 보이게: 머리글·바닥글·메뉴 없이 예매에 필요한 것만 둔다.
+    <main className="min-h-screen">
+      <section className="mx-auto w-full max-w-[560px] px-5 py-10 md:py-14">
+        <div className="space-y-8">
+          <header>
+            <p className="text-[13px] font-semibold tracking-wide text-forest">{SITE_NAME}</p>
+            <h1 className="mt-2 text-[28px] font-bold leading-tight text-ink md:text-[32px]">초청음악회 예매</h1>
+            <p className="mt-3 text-[15px] leading-relaxed text-sub">
+              {CONCERT_AT_LABEL}
+              <br />
+              {CHURCH_ADDRESS}
+              <br />
+              예매는 12월 5일 정오까지 받습니다.
+            </p>
+          </header>
+          <div className="space-y-8">
             <div className="rounded-2xl bg-mist p-6 md:p-7">
               <div className="flex items-end justify-between">
                 <p className="text-[15px] text-sub">남은 좌석</p>
@@ -70,9 +74,8 @@ export default async function ConcertPage() {
               <ConcertForm remaining={status.remaining} />
             )}
           </div>
-        </section>
-      </main>
-      <Footer />
-    </>
+        </div>
+      </section>
+    </main>
   );
 }
