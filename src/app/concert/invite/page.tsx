@@ -77,14 +77,33 @@ export default async function InvitePage({ searchParams }: Props) {
         </header>
 
         <Image
-          src="/concert/poster.jpg"
-          alt="3인 초청음악회 포스터: 소프라노 김성혜, 바리톤 김지욱, 뮤지컬배우 표정범. 12월 5일(토) 오후 4시, 군포 드림숲교회 포레스트홀, 전석 무료"
-          width={1240}
-          height={1754}
+          src="/concert/poster-simple.jpg"
+          alt="3인 초청음악회 포스터: 12월 5일(토) 오후 4시, 군포 드림숲교회 포레스트홀, 전석 무료. 소프라노 김성혜, 바리톤 김지욱, 뮤지컬배우 표정범"
+          width={1167}
+          height={1653}
           sizes="(max-width: 560px) 100vw, 520px"
           priority
           className="w-full rounded-2xl shadow-sm"
         />
+
+        {/* 글씨가 큰 간단한 포스터를 먼저 보여 주고, 출연자 소개·프로그램은 펼쳐서 본다 */}
+        <details className="group rounded-2xl bg-white p-5">
+          <summary className="flex cursor-pointer list-none items-center justify-between text-[16px] font-bold text-ink">
+            출연자 소개와 프로그램 보기
+            <span className="text-forest transition-transform group-open:rotate-180" aria-hidden="true">
+              ▾
+            </span>
+          </summary>
+          <Image
+            src="/concert/poster-full.jpg"
+            alt="3인 초청음악회 전체 포스터: 출연자 약력과 프로그램 12곡 (1. 김지욱 투우사의 노래, 2. 김성혜 보리밭, 3. 표정범 잔향 외)"
+            width={1240}
+            height={1754}
+            sizes="(max-width: 560px) 100vw, 520px"
+            className="mt-4 w-full rounded-xl"
+          />
+          <p className="mt-3 text-center text-[13px] text-mute">사진을 두 손가락으로 벌리면 크게 볼 수 있습니다.</p>
+        </details>
 
         <section className="rounded-2xl bg-white p-6 text-[15px] leading-relaxed text-ink">
           <dl className="space-y-3">
