@@ -4,7 +4,7 @@ export const INVITE_NAME_MAX = 20;
 export function cleanInviteName(raw: string | string[] | undefined): string {
   const value = Array.isArray(raw) ? raw[0] : raw;
   if (!value) return "";
-  return Array.from(
+  const name = Array.from(
     value
       .replace(/[\u0000-\u001f\u007f<>]/g, "") // 제어 문자와 꺾쇠 제거
       .replace(/\s+/g, " ")
@@ -12,4 +12,6 @@ export function cleanInviteName(raw: string | string[] | undefined): string {
   )
     .slice(0, INVITE_NAME_MAX)
     .join("");
+  // 화면에서 "님"을 붙이므로 직접 쓴 "님"은 뺀다 (예: "김집사님" → "김집사"). 이름이 "님" 한 글자뿐이면 그대로 둔다.
+  return name.length > 1 && name.endsWith("님") ? name.slice(0, -1).trim() : name;
 }

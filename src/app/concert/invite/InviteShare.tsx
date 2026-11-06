@@ -6,14 +6,33 @@ import { INVITE_NAME_MAX } from "@/lib/inviteName";
 // 교인이 자기 이름을 넣어 초청장 링크를 만들고 카카오톡 등으로 보낸다. 이름은 링크에만 담기고 서버에는 저장하지 않는다.
 export default function InviteShare() {
   const [name, setName] = useState("");
+  const [to, setTo] = useState("");
   const [copied, setCopied] = useState(false);
   const [failed, setFailed] = useState(false);
 
+  // 화면에서 "님"을 붙이므로 직접 쓴 끝의 "님"은 뺀다 (서버도 같은 규칙으로 다듬는다).
+  const clean = (v: string) => v.trim().replace(/(.)님$/, "$1").trim();
+  const sender = clean(name);
+  const receiver = clean(to);
+
   function makeLink(): string {
     const base = `${window.location.origin}/concert/invite`;
-    const n = name.trim();
-    return n ? `${base}?from=${encodeURIComponent(n)}` : base;
+    const q = new URLSearchParams();
+    if (sender) q.set("from", sender);
+    if (receiver) q.set("to", receiver);
+    const qs = q.toString();
+    return qs ? `${base}?${qs}` : base;
   }
+
+  // 받는 분 화면에 보일 문구 미리보기
+  const preview =
+    sender && receiver
+      ? `${sender}님이 ${receiver}님을 초대합니다`
+      : sender
+        ? `${sender}님이 초대합니다`
+        : receiver
+          ? `${receiver}님을 초대합니다`
+          : "초대합니다";
 
   async function copy() {
     const link = makeLink();
@@ -29,10 +48,10 @@ export default function InviteShare() {
   }
 
   async function share() {
-    const n = name.trim();
+    const who = sender && receiver ? `${sender}님이 ${receiver}님을 ` : sender ? `${sender}님이 ` : receiver ? `${receiver}님을 ` : "";
     const data = {
       title: "3인 초청음악회에 초대합니다",
-      text: `${n ? `${n}님이 ` : ""}12월 5일(토) 오후 4시 군포 드림숲교회 3인 초청음악회에 초대합니다. 전석 무료입니다.`,
+      text: `${who}12월 5일(토) 오후 4시 군포 드림숲교회 3인 초청음악회에 초대합니다. 전석 무료입니다.`,
       url: makeLink(),
     };
     if (typeof navigator.share === "function") {
@@ -50,10 +69,10 @@ export default function InviteShare() {
     <section className="rounded-2xl border border-line p-6">
       <h2 className="text-[18px] font-bold text-ink">내 이름으로 초대장 보내기</h2>
       <p className="mt-2 text-[14px] leading-relaxed text-sub">
-        이름을 넣으면 받는 분 화면에 &ldquo;{name.trim() || "OOO"}님이 초대합니다&rdquo;로 보입니다. 본인 이름만 넣어 주세요.
+        받는 분 화면에 <b className="text-forest">&ldquo;{preview}&rdquo;</b>로 보입니다. 이름 뒤에 &ldquo;님&rdquo;은 붙이지 않아도 됩니다.
       </p>
       <label className="mt-4 block text-[14px] text-sub" htmlFor="invite-from">
-        보내는 사람 이름 (선택)
+        보내는 사람 (본인 이름, 선택)
       </label>
       <input
         id="invite-from"
@@ -61,6 +80,17 @@ export default function InviteShare() {
         maxLength={INVITE_NAME_MAX}
         onChange={(e) => setName(e.target.value)}
         placeholder="예: 김집사"
+        className="mt-1.5 h-12 w-full rounded-xl border border-line px-4 text-[16px] text-ink outline-none focus:border-forest"
+      />
+      <label className="mt-4 block text-[14px] text-sub" htmlFor="invite-to">
+        받는 사람 (초대할 분 이름, 선택)
+      </label>
+      <input
+        id="invite-to"
+        value={to}
+        maxLength={INVITE_NAME_MAX}
+        onChange={(e) => setTo(e.target.value)}
+        placeholder="예: 박영희"
         className="mt-1.5 h-12 w-full rounded-xl border border-line px-4 text-[16px] text-ink outline-none focus:border-forest"
       />
       <div className="mt-4 space-y-3">
