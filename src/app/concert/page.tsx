@@ -10,7 +10,13 @@ const DESCRIPTION = "드림숲교회 3인초청음악회 예매 안내입니다.
 export const metadata: Metadata = {
   ...pageMetadata("/concert", DESCRIPTION),
   title: TITLE,
-  openGraph: { ...BASE_OPEN_GRAPH, title: TITLE, description: DESCRIPTION, url: "/concert" },
+  openGraph: {
+    ...BASE_OPEN_GRAPH,
+    title: TITLE,
+    description: DESCRIPTION,
+    url: "/concert",
+    images: [{ url: "/concert/og.jpg", width: 1200, height: 630, alt: "3인 초청음악회 포스터" }],
+  },
 };
 
 export const dynamic = "force-dynamic";
