@@ -1,5 +1,4 @@
 // 초청음악회 예매 페이지: 남은 좌석을 보여 주고 이름·연락처·인원을 받는다.
-import Image from "next/image";
 import type { Metadata } from "next";
 import { BASE_OPEN_GRAPH, pageMetadata } from "@/lib/pageMetadata";
 import { CAPACITY, CONCERT_AT_LABEL, LOW_SEATS, getSeatStatus } from "@/lib/concert";
@@ -43,15 +42,6 @@ export default async function ConcertPage() {
               예매는 12월 5일 정오까지 받습니다.
             </p>
           </header>
-          <Image
-            src="/concert/poster-simple.jpg"
-            alt="3인 초청음악회 포스터: 12월 5일(토) 오후 4시, 군포 드림숲교회 포레스트홀, 전석 무료. 소프라노 김성혜, 바리톤 김지욱, 뮤지컬배우 표정범"
-            width={1167}
-            height={1653}
-            sizes="(max-width: 560px) 100vw, 520px"
-            priority
-            className="w-full rounded-2xl shadow-sm"
-          />
           <div className="space-y-8">
             <div className="rounded-2xl bg-mist p-6 md:p-7">
               <div className="flex items-end justify-between">
