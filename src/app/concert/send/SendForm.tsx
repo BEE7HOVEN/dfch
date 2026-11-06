@@ -4,7 +4,7 @@ import { useState } from "react";
 import { INVITE_NAME_MAX } from "@/lib/inviteName";
 
 // 교인이 자기 이름을 넣어 초청장 링크를 만들고 카카오톡 등으로 보낸다. 이름은 링크에만 담기고 서버에는 저장하지 않는다.
-export default function InviteShare() {
+export default function SendForm() {
   const [name, setName] = useState("");
   const [to, setTo] = useState("");
   const [copied, setCopied] = useState(false);
@@ -15,13 +15,13 @@ export default function InviteShare() {
   const sender = clean(name);
   const receiver = clean(to);
 
+  const q = new URLSearchParams();
+  if (sender) q.set("from", sender);
+  if (receiver) q.set("to", receiver);
+  const invitePath = q.toString() ? `/concert/invite?${q}` : "/concert/invite";
+
   function makeLink(): string {
-    const base = `${window.location.origin}/concert/invite`;
-    const q = new URLSearchParams();
-    if (sender) q.set("from", sender);
-    if (receiver) q.set("to", receiver);
-    const qs = q.toString();
-    return qs ? `${base}?${qs}` : base;
+    return `${window.location.origin}${invitePath}`;
   }
 
   // 받는 분 화면에 보일 문구 미리보기
@@ -66,8 +66,8 @@ export default function InviteShare() {
   }
 
   return (
-    <section className="rounded-2xl border border-line p-6">
-      <h2 className="text-[18px] font-bold text-ink">내 이름으로 초대장 보내기</h2>
+    <section className="rounded-2xl bg-white p-6">
+      <h1 className="text-[22px] font-bold text-ink">초대장 보내기</h1>
       <p className="mt-2 text-[14px] leading-relaxed text-sub">
         받는 분 화면에 <b className="text-forest">&ldquo;{preview}&rdquo;</b>로 보입니다. 이름 뒤에 &ldquo;님&rdquo;은 붙이지 않아도 됩니다.
       </p>
@@ -109,6 +109,14 @@ export default function InviteShare() {
           {copied ? "복사했습니다" : "링크 복사"}
         </button>
       </div>
+      <a
+        href={invitePath}
+        target="_blank"
+        rel="noopener"
+        className="mt-4 block text-center text-[14px] font-semibold text-forest underline underline-offset-4"
+      >
+        받는 분 화면 미리 보기
+      </a>
       {failed && <p className="mt-3 text-[13px] text-mute">링크 복사가 막혀 있어 창으로 보여 드렸습니다.</p>}
     </section>
   );

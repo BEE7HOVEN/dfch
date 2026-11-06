@@ -1,4 +1,4 @@
-// 모바일 초청장: 교인이 카카오톡으로 지인에게 보내는 페이지. 포스터와 영상을 보여 주고 예매로 연결한다.
+// 모바일 초청장: 지인이 카카오톡으로 받아 보는 페이지. 포스터와 영상을 보여 주고 예매로 연결한다. (보내는 사람이 링크를 만드는 곳은 /concert/send)
 // 주소 뒤 ?from=이름 이 있으면 "OOO님이 초대합니다"로 보인다 (이름은 저장하지 않는다).
 import Image from "next/image";
 import Link from "next/link";
@@ -7,7 +7,6 @@ import { BASE_OPEN_GRAPH } from "@/lib/pageMetadata";
 import { cleanInviteName } from "@/lib/inviteName";
 import { CHURCH_ADDRESS, CHURCH_PHONE, SITE_NAME } from "@/lib/site";
 import { CONCERT_AT_LABEL } from "@/lib/concertConfig";
-import InviteShare from "./InviteShare";
 
 type Props = { searchParams: Promise<{ [key: string]: string | string[] | undefined }> };
 
@@ -153,7 +152,6 @@ export default async function InvitePage({ searchParams }: Props) {
           </video>
         </section>
 
-        <InviteShare />
       </div>
 
       {/* 아래에 고정된 예매 버튼: 어디까지 내려 보든 바로 누를 수 있게 한다 */}
